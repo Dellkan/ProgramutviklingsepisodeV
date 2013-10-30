@@ -1,13 +1,17 @@
 package com.theforce.programutviklingsepisodeV;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.GridBagLayout;
 import java.util.ArrayList;
+
 import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 
 @SuppressWarnings("serial")
 public class WindowManager extends JFrame {
@@ -36,14 +40,10 @@ public class WindowManager extends JFrame {
 	}
 	
 	public Boolean createChannel(String pChannelName, Boolean pIsPrivateMessage) {
-		// Create window
-		JInternalFrame window = new JInternalFrame (pChannelName, true, true, true, true);
-		this.mWindows.add(window);
-		
 		// Create contents of window
-		MyPanel panel = new MyPanel();
-		window.add (panel);
-		window.pack();
+		Window window = new Window(pChannelName, true, true, true, true);
+		this.mWindows.add(window);
+		//window.pack();
 		
 		// Add window to manager
 		this.mFrame.add(window);
@@ -51,19 +51,12 @@ public class WindowManager extends JFrame {
 		// Set window position
 		window.setLocation(100, 100);
 		
+		// Set window size
+		window.setSize(200, 200);
+		
 		// Update and make visible
 		window.setVisible(true);
 		System.out.print(this.mWindows.size());
 		return true;
-	}
-}
-
-//Lazy lazy, we place the MyPanel class here to avoid extra files
-@SuppressWarnings("serial")
-class MyPanel extends JPanel {
-	public MyPanel () {
-		JLabel label = new JLabel ("Some text");
-		setLayout (new BorderLayout ());
-		add (new JScrollPane (label));
 	}
 }
