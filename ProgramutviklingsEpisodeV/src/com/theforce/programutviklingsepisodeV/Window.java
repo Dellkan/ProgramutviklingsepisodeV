@@ -24,6 +24,9 @@ class Window extends JInternalFrame {
 		
 		// Create content area
 		this.chat = new JTextArea();
+		this.chat.setEditable(false);
+		this.chat.append("\ntestfgfdgfdgfdhreftgjhfjkshgodhniusnfginbordhndouhbspgnoufhgpfdnogursngpbordsngofbprnfgousnpfgnsuogbndnbsgousbngsbf fioghfdpihgnfdgfdngofdngofdngf noifdhgfdjgoifdng iufdhgpossme535ngfd gog4 n fdGHFGHHFG");
+		this.chat.setLineWrap(true);
 		
 		constraints.gridwidth = java.awt.GridBagConstraints.RELATIVE;
 		constraints.fill = java.awt.GridBagConstraints.BOTH;
@@ -33,9 +36,9 @@ class Window extends JInternalFrame {
 		constraints.weighty = 1.0;
 		constraints.anchor = java.awt.GridBagConstraints.WEST;
 		
-		//JScrollPane chatScroller = new JScrollPane(this.chat);
+		JScrollPane chatScroller = new JScrollPane(this.chat);
 		
-		this.add(this.chat, constraints);
+		this.add(chatScroller, constraints);
 		
 		// Create user list
 		this.users = new JList();
