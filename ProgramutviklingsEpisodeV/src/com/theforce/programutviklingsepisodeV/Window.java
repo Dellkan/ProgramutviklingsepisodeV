@@ -1,73 +1,129 @@
 package com.theforce.programutviklingsepisodeV;
 
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import javax.swing.*;
+import javax.swing.text.*;
 
-import javax.swing.JInternalFrame;
-import javax.swing.JList;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
+import java.awt.*;
 
 @SuppressWarnings("serial")
 class Window extends JInternalFrame {
-	JTextArea chat;
+	JTextPane chat;
 	JList users;
 	JTextField cli;
 	public Window(String title, boolean resizable, boolean closable, boolean maximizable, boolean iconifiable) {
 		super(title, resizable, closable, maximizable, iconifiable);
-		// Layout stuff
-		this.setLayout (new GridBagLayout());
-		GridBagConstraints constraints = new GridBagConstraints();
-		
 		// Create content area
-		this.chat = new JTextArea();
-		this.chat.setEditable(false);
-		this.chat.append("\ntestfgfdgfdgfdhreftgjhfjkshgodhniusnfginbordhndouhbspgnoufhgpfdnogursngpbordsngofbprnfgousnpfgnsuogbndnbsgousbngsbf fioghfdpihgnfdgfdngofdngofdngf noifdhgfdjgoifdng iufdhgpossme535ngfd gog4 n fdGHFGHHFG");
-		this.chat.setLineWrap(true);
+		this.chat = new JTextPane();
 		
-		constraints.gridwidth = java.awt.GridBagConstraints.RELATIVE;
-		constraints.fill = java.awt.GridBagConstraints.BOTH;
-		constraints.gridx = 1;
-		constraints.gridy = 1;
-		constraints.weightx = 1.0;
-		constraints.weighty = 1.0;
-		constraints.anchor = java.awt.GridBagConstraints.WEST;
+        try {
+        	// Set up editor
+        	this.chat.setEditorKit(new ChatWindowEditorKit());
+            SimpleAttributeSet attrs = new SimpleAttributeSet();
+            StyleConstants.setAlignment(attrs, StyleConstants.ALIGN_LEFT);
+            
+            // Insert some content (debugging)
+            StyledDocument doc = (StyledDocument) this.chat.getDocument();
+            doc.insertString(0, "1", attrs);
+            doc.insertString(0, "1\n", attrs);
+            doc.insertString(0, "1", attrs);
+            doc.insertString(0, "1", attrs);
+            doc.insertString(0, "1", attrs);
+            
+            // ??
+            doc.setParagraphAttributes(0, doc.getLength() - 1, attrs, false);
+        }
+        catch (Exception ex) {
+
+            ex.printStackTrace();
+        }
+		
+		//this.chat = new JTextArea();
+		//this.chat.setEditable(false);
+		//this.chat.setLineWrap(true);
+		//this.chat.setMinimumSize(new Dimension(300, 100));
+		//this.chat.setPreferredSize(new Dimension(500, 100));
 		
 		JScrollPane chatScroller = new JScrollPane(this.chat);
-		
-		this.add(chatScroller, constraints);
 		
 		// Create user list
 		this.users = new JList();
 		this.users.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 		this.users.setLayoutOrientation(JList.HORIZONTAL_WRAP);
 		this.users.setVisibleRowCount(-1);
+		this.users.setMinimumSize(new Dimension(75, 100));
+		this.users.setPreferredSize(new Dimension(125, 0));
 		
 		JScrollPane userScroller = new JScrollPane(this.users);
 		userScroller.setPreferredSize(new Dimension(100, 150));
-
-		constraints.gridwidth = java.awt.GridBagConstraints.RELATIVE;
-		constraints.fill = java.awt.GridBagConstraints.BOTH;
-		constraints.gridx = 2;
-		constraints.anchor = java.awt.GridBagConstraints.EAST;
 		
-		this.add(userScroller, constraints);
+        // Create the split pane that will contain chat window, and user list
+        JSplitPane upperPart = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, chatScroller, userScroller);
+        upperPart.setResizeWeight(1);
 		
 		// Create command line interface (textbox)
-		constraints.gridwidth = java.awt.GridBagConstraints.RELATIVE;
-		constraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		constraints.gridx = 1;
-		constraints.gridy = 2;
-		constraints.weightx = 1.0;
-		constraints.weighty = 0.0;
-		constraints.gridwidth = 2;
-		constraints.anchor = java.awt.GridBagConstraints.SOUTH;
+		this.cli = new JTextField("Commands goes here, stupid");
+		this.cli.setMinimumSize(new Dimension(200, 30));
+		this.cli.setPreferredSize(new Dimension(0, 30));
 		
-		JTextField cli = new JTextField("Commands goes here, stupid");
-		cli.setSize(0, 20);
-		this.add(new JScrollPane (cli), constraints);
+        //Create a split pane with the two scroll panes in it.
+        JSplitPane whole = new JSplitPane(JSplitPane.VERTICAL_SPLIT, upperPart, this.cli);
+        whole.setResizeWeight(1);
+        
+        this.add(whole);
 	}
 }
+
+@SuppressWarnings("serial")
+class ChatWindowEditorKit extends StyledEditorKit {
+
+    public ViewFactory getViewFactory() {
+        return new StyledViewFactory();
+    }
+ 
+    static class StyledViewFactory implements ViewFactory {
+
+        public View create(Element elem) {
+            String kind = elem.getName();
+            if (kind != null) {
+                if (kind.equals(AbstractDocument.ContentElementName)) {
+
+                    return new LabelView(elem);
+                } else if (kind.equals(AbstractDocument.ParagraphElementName)) {
+                    return new ParagraphView(elem);
+                } else if (kind.equals(AbstractDocument.SectionElementName)) {
+
+                    return new ChatWindowBoxView(elem, View.Y_AXIS);
+                } else if (kind.equals(StyleConstants.ComponentElementName)) {
+                    return new ComponentView(elem);
+                } else if (kind.equals(StyleConstants.IconElementName)) {
+
+                    return new IconView(elem);
+                }
+            }
+ 
+            return new LabelView(elem);
+        }
+
+    }
+}
+ 
+class ChatWindowBoxView extends BoxView {
+    public ChatWindowBoxView(Element elem, int axis) {
+        super(elem,axis);
+    }
+    protected void layoutMajorAxis(int targetSpan, int axis, int[] offsets, int[] spans) {
+
+        super.layoutMajorAxis(targetSpan, axis, offsets, spans);
+        int textBlockHeight = 0;
+        int offset = 0;
+
+        for (int i = 0; i < spans.length; i++) {
+            textBlockHeight += spans[i];
+        }
+        
+        offset = (targetSpan - textBlockHeight);
+        for (int i = 0; i < offsets.length; i++) {
+            offsets[i] += offset;
+        }
+    }
+}   

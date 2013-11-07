@@ -52,7 +52,7 @@ public class WindowManager extends JFrame {
 		window.setLocation(100, 100);
 		
 		// Set window size
-		window.setSize(200, 200);
+		window.setSize(400, 300);
 		
 		// Update and make visible
 		window.setVisible(true);
