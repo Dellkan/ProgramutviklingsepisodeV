@@ -30,42 +30,22 @@ public class IRCEventHandler implements IRCEventListener{
 	/**
 	 * Handles Handles different events received through the IRC session
 	 */
-/*	@Override
-	public void recieveEvent(IRCEvent event) {
-		if (event.getType() == Type.CONNECT_COMPLETE)
-		{
-			(event.getSession()).joinChannel("Default");;
- 
-		}
-		else if (event.getType() == Type.CHANNEL_MESSAGE)
-		{
-			MessageEvent me = (MessageEvent) event;
-			System.out.println("<" + me.getNick() + ">"+ ":" + me.getMessage());
-		}
-		else if (event.getType() == Type.JOIN_COMPLETE)
-		{
-			JoinCompleteEvent jce = (JoinCompleteEvent) event;
- 
-			/* say hello and version number *//*
-			jce.getChannel().say("Hello from Jerklib " + ConnectionManager.getVersion());
-		}
-		else
-		{
-			System.out.println(event.getType() + " " + event.getRawEventData());
-		}
-		
-	}*/
 	@Override
 	public void receiveEvent(IRCEvent event) {
 		// TODO Auto-generated method stub
 		if (event.getType() == Type.CONNECT_COMPLETE)
 		{
-			(event.getSession()).joinChannel("Default");
+			(event.getSession()).join("Default");
  
 		}
 		else if (event.getType() == Type.CHANNEL_MESSAGE)
 		{
 			MessageEvent me = (MessageEvent) event;
+			/**
+			 * HER MÅ DET KALLES EN FUNKSJON SOM SKRIVER DEN UT I TEXTAREAEN
+			 * 
+			 */
+			
 			System.out.println("<" + me.getNick() + ">"+ ":" + me.getMessage());
 		}
 		else if (event.getType() == Type.JOIN_COMPLETE)
@@ -73,7 +53,7 @@ public class IRCEventHandler implements IRCEventListener{
 			JoinCompleteEvent jce = (JoinCompleteEvent) event;
  
 			/* say hello and version number */
-			jce.getChannel().say("Hello from Jerklib " + ConnectionManager.getVersion());
+			jce.getChannel().say("Hello from " + profile.getName());
 		}
 		else
 		{
