@@ -35,7 +35,7 @@ public class IRCEventHandler implements IRCEventListener{
 		// TODO Auto-generated method stub
 		if (event.getType() == Type.CONNECT_COMPLETE)
 		{
-			(event.getSession()).join("Default");
+			(event.getSession()).join("#jerklibtest");
  
 		}
 		else if (event.getType() == Type.CHANNEL_MESSAGE)

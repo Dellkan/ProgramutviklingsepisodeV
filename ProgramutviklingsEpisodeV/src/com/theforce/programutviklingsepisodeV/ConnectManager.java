@@ -5,6 +5,8 @@ import jerklib.Profile;
 import jerklib.Session;
 
 /**
+ * Use addConnection for new connections !:D
+ * 
  * 
  * @author Hans Martin Bragen
  * @author John Høeg-Omdal
@@ -16,7 +18,7 @@ public class ConnectManager {
 	Session session;
 	ConnectionManager conManager;
 	
-	public ConnectManager(String serverName, Profile profile)
+	public ConnectManager()
 	{
 		/**
 		 * EMPTY CONSTRUCTOR
@@ -33,6 +35,7 @@ public class ConnectManager {
 	{
 		conManager = new ConnectionManager(profile);
 		session = conManager.requestConnection(serverName);
+		System.out.print("session initiated");
 		new IRCEventHandler(session, profile);
 	}
 	
