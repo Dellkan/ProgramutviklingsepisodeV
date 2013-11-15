@@ -21,7 +21,7 @@ public class Toolbar extends JToolBar {
         button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
                 // New
-            	Launcher.getManager().createChannel("test", false);
+            	//Launcher.getManager().createChannel("test", false);
             }
         });
         this.add(button);
