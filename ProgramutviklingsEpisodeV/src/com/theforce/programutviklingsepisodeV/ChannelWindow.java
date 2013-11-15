@@ -13,7 +13,7 @@ public class ChannelWindow extends Window {
 	@Override
 	public void commandParser() {
 		if (this.mCli.getText().charAt(0) == '/') {
-			//this.mChannel;
+			this.mChannel.action(this.mCli.getText().substring(1));
 		}
 		
 		else {

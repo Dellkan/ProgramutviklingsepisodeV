@@ -12,6 +12,12 @@ public class ServerWindow extends Window {
 
 	@Override
 	public void commandParser() {
-		// TODO Auto-generated method stub	
+		if (this.mCli.getText().charAt(0) == '/') {
+			//this.mSession.action(this.mCli.getText().substring(1));
+		}
+		
+		else {
+			this.appendToChat("Can't chat here!");
+		}
 	}
 }
