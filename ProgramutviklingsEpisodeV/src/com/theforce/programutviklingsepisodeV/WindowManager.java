@@ -1,17 +1,12 @@
 package com.theforce.programutviklingsepisodeV;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GridBagLayout;
 import java.util.ArrayList;
 
 import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
+import jerklib.Channel;
+import jerklib.Session;
 
 @SuppressWarnings("serial")
 public class WindowManager extends JFrame {
@@ -28,20 +23,15 @@ public class WindowManager extends JFrame {
 		this.setDefaultCloseOperation (JFrame.EXIT_ON_CLOSE);
 		this.setVisible(true);
 		
-		// Add windowmanager to frame
+		// Add window manager to frame
 		this.add(this.mFrame);
 		
 		// Create window container
 		this.mWindows = new ArrayList<JInternalFrame>();
 	}
 	
-	public Boolean createChannel(String pChannelName) {
-		return this.createChannel(pChannelName, false);
-	}
-	
-	public Boolean createChannel(String pChannelName, Boolean pIsPrivateMessage) {
+	private void setupWindow(Window window) {
 		// Create contents of window
-		Window window = new Window(pChannelName, true, true, true, true);
 		this.mWindows.add(window);
 		//window.pack();
 		
@@ -56,7 +46,20 @@ public class WindowManager extends JFrame {
 		
 		// Update and make visible
 		window.setVisible(true);
-		System.out.print(this.mWindows.size());
-		return true;
+	}
+	
+	public void createServerWindow(Session pSession) {
+		ServerWindow window = new ServerWindow(pSession);
+		this.setupWindow(window);
+	}
+	
+	public void createChannelWindow(Channel pChannel) {
+		ChannelWindow window = new ChannelWindow(pChannel);
+		this.setupWindow(window);
+	}
+	
+	public void createQueryWindow(Session pSession, String pNickname) {
+		QueryWindow window = new QueryWindow(pSession, pNickname);
+		this.setupWindow(window);
 	}
 }
