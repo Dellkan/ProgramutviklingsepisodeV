@@ -1,5 +1,7 @@
 package com.theforce.programutviklingsepisodeV;
 
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -8,14 +10,26 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Vector;
 
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
 
-public class LoadServers extends JFrame implements ActionListener {
+import jerklib.ConnectionManager;
+import jerklib.Profile;
+
+public class LoadServers extends JFrame {
 	Vector<Server> serverList;
 	Vector<String> networkList; 
+	JTextField userName;
+	JTextField alternativeUserName;
+	JTextField email;
+	JLabel jt;
+	JTextField realName;
 	JComboBox serverBox = new JComboBox();
 	JComboBox networkBox;
+	GridBagConstraints gbc = new GridBagConstraints();
 
 	
 	LoadServers() 
@@ -23,8 +37,7 @@ public class LoadServers extends JFrame implements ActionListener {
 		super("Select server");
 		this.setLayout(new GridBagLayout());
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setMinimumSize(300,300);
-		pack();
+		this.setPreferredSize(400,400);
 		setVisible(true);
 		
 		serverList = new Vector<Server>();
@@ -59,9 +72,9 @@ public class LoadServers extends JFrame implements ActionListener {
 								break;
 							case "servers":
 								String network = sCurrentLine.substring(sCurrentLine.indexOf("GROUP")+6, sCurrentLine.length());								
-								if(!networkList.contains(network)) 	//There are some networks which are not listed in the networklist
+								if(!networkList.contains(network)) 
+									    //There are some networks which are not listed in the networklist
 								{		//This will add them to the network vectorlist.
-									System.out.println("swag");
 									networkList.add(network);
 								}
 								serverList.add(new Server(sCurrentLine));
@@ -79,8 +92,16 @@ public class LoadServers extends JFrame implements ActionListener {
 				ex.printStackTrace();
 			}
 		}
+		
+		/*
+		 * Bør nok muligens flyttes til GUI funksjonen.
+		 */
+
+		
+		showUserProfileGUI();
 		showNetworks();
-		//showServers("EFnet");
+		showServers(networkList.firstElement());
+		this.pack();
 	}
 	
 
@@ -97,17 +118,15 @@ public class LoadServers extends JFrame implements ActionListener {
 
 
 	public void showServers(String network) {
+		
 		serverBox.removeAllItems();
 		for(int i = 0; i < serverList.size();i++)
 		{
 			String serverNetwork = serverList.get(i).getNetwork();
 			if(serverNetwork.contentEquals(network)) {
-				serverBox.addItem(serverList.get(i).getLocation() + " " + serverNetwork);
+				serverBox.addItem(serverList.get(i));
 			}
 		}
-		serverBox.addActionListener(this);
-		serverBox.setSize(100,30);
-		getContentPane().add(serverBox);
 		pack();
 	}
 	
@@ -118,45 +137,128 @@ public class LoadServers extends JFrame implements ActionListener {
 			listModel.addElement(networkList.elementAt(i));
 		}
 		networkBox = new JComboBox(listModel);
-		networkBox.addActionListener(this);
-		networkBox.setSize(100,30);
-		getContentPane().add(networkBox);
+		networkBox.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				showServers(networkBox.getSelectedItem().toString());
+			}		
+		});
+		
+		gbc.gridx = 3;
+		gbc.gridy = 0;
+		networkBox.setPreferredSize(new Dimension(100,30));
+		this.add(networkBox,gbc);
 		pack();
 		
 	}
 	
+	public void showUserProfileGUI(){
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		jt = new JLabel("Username: ");
+		this.add(jt,gbc);
+		
+		gbc.gridy = 1;
+		jt = new JLabel("Alternative Username: ");
+		this.add(jt,gbc);
+		
+		gbc.gridy = 3;
+		jt = new JLabel("Real name: ");
+		this.add(jt,gbc);
+		
+		gbc.gridx = 1;
+		gbc.gridy = 0;
+		gbc.weightx = 1;
+		gbc.ipadx = 100;
+		userName = new JTextField();
+		this.add(userName,gbc);
+		
+		gbc.gridy = 1;
+		alternativeUserName = new JTextField();
+		this.add(alternativeUserName,gbc);
+
+		
+		gbc.gridy = 3;
+		realName = new JTextField();
+		this.add(realName,gbc);
+		
+		jt = new JLabel("Network: ");
+		gbc.gridx = 2;
+		gbc.gridy = 0;
+		this.add(jt,gbc);
+		
+		jt = new JLabel("Server: ");
+		gbc.gridy = 1;
+		this.add(jt,gbc);
+		
+		gbc.gridx = 3;
+		gbc.gridy = 1;
+		this.add(serverBox,gbc);
+		
+		gbc.gridx = 2;
+		gbc.gridy = 5;
+		JButton connectServer = new JButton("Connect");
+		connectServer.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				/*
+				 * Get profile and connect to IRC yo
+				 */
+				System.out.println("Connect");
+				if(userName.getText().length() >= 1)	//Will only connect if userName written
+				{
+					Profile profile = getUserProfile();
+					ConnectionManager cm = new ConnectionManager(profile);
+					IRCEventHandler irc = new IRCEventHandler(cm.requestConnection(getChosenServer().getDns()), profile);
+				}
+			}
+			
+		});
+		this.add(connectServer,gbc);
+	}
+	
+	public Server getChosenServer() {	//Returne DNS her, kanskje port og?
+		return (Server) serverBox.getSelectedItem();
+	}
+	
+	public Profile getUserProfile() {
+		String nick = this.userName.getText();
+		String real = this.realName.getText();
+		String alternate = this.alternativeUserName.getText();
+		
+		/*
+		 * If no alternative nick supplied, or equals mainNick
+		 * Generates alternativeNickName
+		 */
+		if(alternate.length() < 1 || nick.contentEquals(alternate))	
+		{
+			alternate = nick + "1";
+		}
+		
+		if(real.length() < 1) 
+		{
+			real = "hurradurradrp";
+		}
+		return new Profile(real,nick, alternate, (alternate+"2"));
+	}
 	public Vector<Server> getServerList() {
 		return serverList;
 	}
 	public Vector<String> getNetworkList() {
 		return networkList;
 	}
-	
-	
-	
-	
+
 	
 	public static void main(String Args[]) {
 
+		/*
+		 * FOR TESTING PURPOSES
+		 */
 		LoadServers servers = new LoadServers();
 		//JFrame serverWindow = new JFrame("Pick a server")		
 		
-	}
-
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
-	    JComboBox box = (JComboBox) e.getSource();	
-		String picked = (String) box.getSelectedItem();
-		if(box == serverBox) {
-			System.out.println(picked);
-			/*
-			 * Do weird stuff with server here I guess ?
-			 */
-		} else if(box == networkBox) {
-			showServers(picked);
-		}
 	}
 
 }

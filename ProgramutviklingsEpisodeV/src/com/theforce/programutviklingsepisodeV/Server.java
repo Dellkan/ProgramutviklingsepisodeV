@@ -60,6 +60,9 @@ public class Server {
 		network = srvInfo.substring(srvInfo.lastIndexOf(":")+1, srvInfo.length());
 	}
 
+	public String toString() {
+		return location + " " + network + " (" + dns + ")";
+	}
 	public String getNetworkNumber() {
 		return networkNumber;
 	}
