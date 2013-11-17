@@ -4,13 +4,16 @@ package com.theforce.programutviklingsepisodeV;
  * @author John Høegh Omdal
  * @author Martin Bragen
  */
+import java.io.Serializable;
 import java.util.Vector;
-
-import jerklib.Profile;
 /*
  * A server helperclass which will read one server from a file.
  */
-public class Server {
+public class Server implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private String networkNumber;
 	private String location;
 	private String dns;

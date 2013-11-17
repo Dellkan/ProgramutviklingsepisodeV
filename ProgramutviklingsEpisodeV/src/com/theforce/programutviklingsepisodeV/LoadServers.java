@@ -6,8 +6,12 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -30,6 +34,9 @@ public class LoadServers extends JFrame {
 	JComboBox serverBox = new JComboBox();
 	JComboBox networkBox;
 	GridBagConstraints gbc = new GridBagConstraints();
+	final static String FILE_NAME = "profile.data";
+
+
 
 	
 	LoadServers() 
@@ -37,7 +44,6 @@ public class LoadServers extends JFrame {
 		super("Select server");
 		this.setLayout(new GridBagLayout());
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setPreferredSize(400,400);
 		setVisible(true);
 		
 		serverList = new Vector<Server>();
@@ -98,24 +104,31 @@ public class LoadServers extends JFrame {
 		 */
 
 		
+
 		showUserProfileGUI();
 		showNetworks();
 		showServers(networkList.firstElement());
 		this.pack();
 	}
+
+	/*
+	 * Loads earlier(if they exist) data about a user profile
+	 */
+	public void loadProfileData() {
+		
+	}
 	
-
-	private void setMinimumSize(int i, int j) {
-		// TODO Auto-generated method stub
-		
+	/*
+	 * Stores profile data in a .data file
+	 */
+	public void storeProfileData(Profile profile) throws IOException {
+		 FileOutputStream fileOut = new FileOutputStream(FILE_NAME);
+         ObjectOutputStream out = new ObjectOutputStream(fileOut);
+         out.writeObject(profile);
+         out.writeObject(null);
+         out.close();
+         fileOut.close();
 	}
-
-
-	private void setPreferredSize(int i, int j) {
-		// TODO Auto-generated method stub
-		
-	}
-
 
 	public void showServers(String network) {
 		
@@ -143,11 +156,11 @@ public class LoadServers extends JFrame {
 				showServers(networkBox.getSelectedItem().toString());
 			}		
 		});
-		
 		gbc.gridx = 3;
 		gbc.gridy = 0;
 		networkBox.setPreferredSize(new Dimension(100,30));
 		this.add(networkBox,gbc);
+		
 		pack();
 		
 	}
@@ -214,7 +227,6 @@ public class LoadServers extends JFrame {
 					IRCEventHandler irc = new IRCEventHandler(cm.requestConnection(getChosenServer().getDns()), profile);
 				}
 			}
-			
 		});
 		this.add(connectServer,gbc);
 	}
