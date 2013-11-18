@@ -35,7 +35,6 @@ public class ConnectManager {
 	{
 		conManager = new ConnectionManager(profile);
 		session = conManager.requestConnection(serverName);
-		System.out.print("session initiated");
 		new IRCEventHandler(session, profile);
 	}
 	

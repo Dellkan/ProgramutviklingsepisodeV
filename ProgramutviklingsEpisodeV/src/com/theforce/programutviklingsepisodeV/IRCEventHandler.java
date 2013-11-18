@@ -19,12 +19,14 @@ import jerklib.listeners.IRCEventListener;
 public class IRCEventHandler implements IRCEventListener{
 	Session session;
 	Profile profile;
+	WindowManager WM;
 	
 	public IRCEventHandler(Session session, Profile profile)
 	{
 		this.session = session;
 		this.profile = profile;
 		this.session.addIRCEventListener(this);
+		WM = new WindowManager();
 	}
 
 	/**
@@ -41,6 +43,7 @@ public class IRCEventHandler implements IRCEventListener{
 		else if (event.getType() == Type.CHANNEL_MESSAGE)
 		{
 			MessageEvent me = (MessageEvent) event;
+			me.getChannel();
 			/**
 			 * HER MÅ DET KALLES EN FUNKSJON SOM SKRIVER DEN UT I TEXTAREAEN
 			 * 
@@ -51,15 +54,32 @@ public class IRCEventHandler implements IRCEventListener{
 		else if (event.getType() == Type.JOIN_COMPLETE)
 		{
 			JoinCompleteEvent jce = (JoinCompleteEvent) event;
- 
-			/* say hello and version number */
-			jce.getChannel().say("Hello from " + profile.getName());
+			jce.getChannel().say(profile.getName() + " has joined the channel.");
 		}
-		else
+		else if (event.getType() == Type.CONNECTION_LOST)
 		{
-			System.out.println(event.getType() + " " + event.getRawEventData());
+			/* Serverwindow + channel window skriv ut error ... */
+			
+			/* eventuelt en reconnect algoritme */
 		}
 		
+		else if (event.getType() == Type.KICK_EVENT)
+		{
+			/* Disconect ting */
+		}
+		else if (event.getType() == Type.MOTD)
+		{
+			/* Channel skriv ut MOTD; */
+		}
+		else if (event.getType() == Type.PRIVATE_MESSAGE)
+		{
+			/* Åpne nytt vindu med privchat */
+		}
+		else if (event.getType() == Type.CTCP_EVENT)
+		{
+			/* Åpne nytt vindu med privchat */
+		}
+		//if (event.getType() == Type.
 	}
 
 }
