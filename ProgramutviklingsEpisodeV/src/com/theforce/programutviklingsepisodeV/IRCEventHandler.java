@@ -28,16 +28,22 @@ public class IRCEventHandler implements IRCEventListener{
 		this.session.addIRCEventListener(this);
 		this.window = window;
 	}
+	
+	public void joinChannel(String channel)
+	{
+		session.join(channel);
+	}
 
 	/**
 	 * Handles Handles different events received through the IRC session
 	 */
 	@Override
+	
 	public void receiveEvent(IRCEvent event) {
 		// TODO Auto-generated method stub
 		if (event.getType() == Type.CONNECT_COMPLETE)
 		{
-			(event.getSession()).join("#jerklibtest");
+			//(event.getSession()).join("#jerklibtest");
  
 		}
 		else if (event.getType() == Type.CHANNEL_MESSAGE)
