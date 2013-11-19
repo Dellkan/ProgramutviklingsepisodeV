@@ -19,14 +19,14 @@ import jerklib.listeners.IRCEventListener;
 public class IRCEventHandler implements IRCEventListener{
 	Session session;
 	Profile profile;
-	WindowManager WM;
+	Window window;
 	
-	public IRCEventHandler(Session session, Profile profile)
+	public IRCEventHandler(Session session, Profile profile, Window window)
 	{
 		this.session = session;
 		this.profile = profile;
 		this.session.addIRCEventListener(this);
-		WM = new WindowManager();
+		this.window = window;
 	}
 
 	/**
