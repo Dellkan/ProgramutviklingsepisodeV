@@ -6,12 +6,12 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
+import java.io.ObjectInputStream;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -25,12 +25,11 @@ import jerklib.Profile;
 
 public class LoadServers extends JFrame {
 	Vector<Server> serverList;
-	Vector<String> networkList; 
+	Vector<String> networkList;
+	JTextField realName;
 	JTextField userName;
 	JTextField alternativeUserName;
-	JTextField email;
 	JLabel jt;
-	JTextField realName;
 	JComboBox serverBox = new JComboBox();
 	JComboBox networkBox;
 	GridBagConstraints gbc = new GridBagConstraints();
@@ -108,26 +107,69 @@ public class LoadServers extends JFrame {
 		showUserProfileGUI();
 		showNetworks();
 		showServers(networkList.firstElement());
+		loadProfileData();
 		this.pack();
 	}
 
 	/*
 	 * Loads earlier(if they exist) data about a user profile
 	 */
-	public void loadProfileData() {
-		
+	public void loadProfileData() {		 
+		   try{
+			   File file = new File(FILE_NAME);
+			   FileReader filereader = new FileReader(file);
+			   BufferedReader bufferedReader = new BufferedReader(filereader);
+			   String profile = bufferedReader.readLine();
+			   
+			   int start = 0;
+			   int end = profile.indexOf(",");
+			   realName.setText(profile.substring(start, end));
+			   start = end;
+			   end = profile.indexOf(",", start+1);
+			   userName.setText(profile.substring(start+1, end));
+			   start = end;
+			   end = profile.length();
+			   alternativeUserName.setText(profile.substring(start+1,end));  		   
+		   }catch(Exception ex){
+			   ex.printStackTrace();
+		   } 
 	}
 	
 	/*
 	 * Stores profile data in a .data file
 	 */
-	public void storeProfileData(Profile profile) throws IOException {
-		 FileOutputStream fileOut = new FileOutputStream(FILE_NAME);
-         ObjectOutputStream out = new ObjectOutputStream(fileOut);
-         out.writeObject(profile);
-         out.writeObject(null);
-         out.close();
-         fileOut.close();
+	public void storeProfileData(Profile profile) {
+		/*
+		 * Was supposed to write out the entire object, but
+		 * then we would have to edit jerklibs Profile() 
+		 */
+		FileOutputStream fop = null;
+		File file;
+		String content = profile.getName() + "," + profile.getFirstNick() + 
+						 "," + profile.getSecondNick(); 
+		try {
+ 
+			file = new File(FILE_NAME);
+			fop = new FileOutputStream(file);
+			file.createNewFile();
+			
+			byte[] contentInBytes = content.getBytes("UTF-8");
+ 
+			fop.write(contentInBytes);
+			fop.flush();
+			fop.close();
+  
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (fop != null) {
+					fop.close();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public void showServers(String network) {
@@ -225,6 +267,8 @@ public class LoadServers extends JFrame {
 					Profile profile = getUserProfile();
 					ConnectionManager cm = new ConnectionManager(profile);
 					IRCEventHandler irc = new IRCEventHandler(cm.requestConnection(getChosenServer().getDns()), profile);
+					
+					storeProfileData(profile);
 				}
 			}
 		});
