@@ -1,11 +1,10 @@
 package com.theforce.programutviklingsepisodeV;
+import jerklib.Channel;
 import jerklib.ConnectionManager;
 import jerklib.Profile;
 import jerklib.Session;
 import jerklib.events.*;
-import jerklib.events.IRCEvent;
 import jerklib.events.IRCEvent.Type;
-import jerklib.events.MessageEvent;
 import jerklib.listeners.IRCEventListener;
 
 /**
@@ -28,10 +27,53 @@ public class IRCEventHandler implements IRCEventListener{
 		this.session.addIRCEventListener(this);
 		this.window = window;
 	}
-	
+	/**
+	 * Kicks a user from the IRC channel.
+	 * @param channel object with target channel
+	 * @param username string containing nick of person to be kicked
+	 * @param reason String where the user can specify reason for kick
+	 */
+	public void kickUser(Channel channel, String username, String reason)
+	{
+		/*
+		 * Implementer sjekk for rettigheter ?
+		 */
+		channel.kick(username, reason);
+	}
+	/**
+	 * Joins a new channel in the current session
+	 * @param channel String containing name of channel to join.
+	 */
 	public void joinChannel(String channel)
 	{
 		session.join(channel);
+	}
+	/**
+	 * Prints to session channel.	 
+	 * @param channel object of the channel to print to
+	 * @param out String containing what to print
+	 */
+	public void say( Channel channel, String out)
+	{
+		channel.say(out);
+	}
+	/**
+	 * Prevents a user from speaking in the channel
+	 * @param channel object containing the target channel
+	 * @param user string containing nick of user to mute
+	 */
+	public void mute(Channel channel, String user)
+	{
+		channel.deVoice(user);
+	}
+	/**
+	 * Allows a user to speaking in the channel
+	 * @param channel object containing the target channel
+	 * @param user string containing nick of user to unmute
+	 */
+	public void unMute(Channel channel, String user)
+	{
+		channel.voice(user);
 	}
 
 	/**
