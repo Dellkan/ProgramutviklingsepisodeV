@@ -7,11 +7,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -22,7 +20,9 @@ import javax.swing.JTextField;
 
 import jerklib.ConnectionManager;
 import jerklib.Profile;
+import jerklib.Session;
 
+@SuppressWarnings("serial")
 public class LoadServers extends JFrame {
 	Vector<Server> serverList;
 	Vector<String> networkList;
@@ -35,14 +35,9 @@ public class LoadServers extends JFrame {
 	GridBagConstraints gbc = new GridBagConstraints();
 	final static String FILE_NAME = "profile.data";
 
-
-
-	
-	LoadServers() 
-	{
+	LoadServers() {
 		super("Select server");
 		this.setLayout(new GridBagLayout());
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
 		
 		serverList = new Vector<Server>();
@@ -55,31 +50,34 @@ public class LoadServers extends JFrame {
 			
 			br = new BufferedReader(new FileReader("mIRCServers.ini"));
  
-			while ((sCurrentLine = br.readLine()) != null) 
-			{
+			while ((sCurrentLine = br.readLine()) != null) {
 				
-				if(sCurrentLine.length() > 1)		//In case of blank line
-				{
-					if(sCurrentLine.contains("[timestamp]")) {				
+				if(sCurrentLine.length() > 1) {
+					if (sCurrentLine.contains("[timestamp]")) {				
 						type = "timestamp";
-					} else if(sCurrentLine.contains("[networks]")) {
+					}
+					
+					else if (sCurrentLine.contains("[networks]")) {
 						type = "networks";
-					} else if(sCurrentLine.contains("[servers]"))	{
+					}
+					
+					else if (sCurrentLine.contains("[servers]")) {
 						type = "servers";
-					} else if(type != null)	//Type is set, and we are running through the serverlist, networklist, etc
-					{
-							switch(type) 
-							{
+					} 
+					
+					//Type is set, and we are running through the serverlist, networklist, etc
+					else if(type != null) {
+							switch(type) {
 							case "timestamp":
 								break;
 							case "networks":
 								networkList.add(sCurrentLine.substring(3, sCurrentLine.length()));
 								break;
 							case "servers":
-								String network = sCurrentLine.substring(sCurrentLine.indexOf("GROUP")+6, sCurrentLine.length());								
-								if(!networkList.contains(network)) 
-									    //There are some networks which are not listed in the networklist
-								{		//This will add them to the network vectorlist.
+								String network = sCurrentLine.substring(sCurrentLine.indexOf("GROUP")+6, sCurrentLine.length());
+								//There are some networks which are not listed in the networklist
+								//This will add them to the network vectorlist.
+								if(!networkList.contains(network)) {		
 									networkList.add(network);
 								}
 								serverList.add(new Server(sCurrentLine));
@@ -88,21 +86,23 @@ public class LoadServers extends JFrame {
 					}
 				}
 			}
-		} catch (IOException e) {
+		} 
+		
+		catch (IOException e) {
 			e.printStackTrace();
-		} finally {
+		} 
+		
+		finally {
 			try {
-				if (br != null)br.close();
-			} catch (IOException ex) {
-				ex.printStackTrace();
+				if (br != null) {
+					br.close();
+				}
+			} 
+			
+			catch (IOException e) {
+				e.printStackTrace();
 			}
 		}
-		
-		/*
-		 * Bør nok muligens flyttes til GUI funksjonen.
-		 */
-
-		
 
 		showUserProfileGUI();
 		showNetworks();
@@ -115,34 +115,32 @@ public class LoadServers extends JFrame {
 	 * Loads earlier(if they exist) data about a user profile
 	 */
 	public void loadProfileData() {		 
-		   try{
-			   File file = new File(FILE_NAME);
-			   FileReader filereader = new FileReader(file);
-			   BufferedReader bufferedReader = new BufferedReader(filereader);
-			   String profile = bufferedReader.readLine();
-			   
-			   int start = 0;
-			   int end = profile.indexOf(",");
-			   realName.setText(profile.substring(start, end));
-			   start = end;
-			   end = profile.indexOf(",", start+1);
-			   userName.setText(profile.substring(start+1, end));
-			   start = end;
-			   end = profile.length();
-			   alternativeUserName.setText(profile.substring(start+1,end));  		   
-		   }catch(Exception ex){
-			   ex.printStackTrace();
-		   } 
+		try{
+			File file = new File(FILE_NAME);
+			if (file.exists()) {
+				FileReader filereader = new FileReader(file);
+				BufferedReader bufferedReader = new BufferedReader(filereader);
+				String profile = bufferedReader.readLine();   
+				int start = 0;
+				int end = profile.indexOf(",");
+				realName.setText(profile.substring(start, end));
+				start = end;
+				end = profile.indexOf(",", start+1);
+				userName.setText(profile.substring(start+1, end));
+				start = end;
+				end = profile.length();
+				alternativeUserName.setText(profile.substring(start+1,end));
+				bufferedReader.close();
+			}
+		} 
+		
+		catch(Exception e) {} 
 	}
 	
 	/*
 	 * Stores profile data in a .data file
 	 */
 	public void storeProfileData(Profile profile) {
-		/*
-		 * Was supposed to write out the entire object, but
-		 * then we would have to edit jerklibs Profile() 
-		 */
 		FileOutputStream fop = null;
 		File file;
 		String content = profile.getName() + "," + profile.getFirstNick() + 
@@ -173,10 +171,8 @@ public class LoadServers extends JFrame {
 	}
 
 	public void showServers(String network) {
-		
 		serverBox.removeAllItems();
-		for(int i = 0; i < serverList.size();i++)
-		{
+		for(int i = 0; i < serverList.size();i++) {
 			String serverNetwork = serverList.get(i).getNetwork();
 			if(serverNetwork.contentEquals(network)) {
 				serverBox.addItem(serverList.get(i));
@@ -258,15 +254,15 @@ public class LoadServers extends JFrame {
 		connectServer.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				/*
-				 * Get profile and connect to IRC yo
-				 */
-				System.out.println("Connect");
-				if(userName.getText().length() >= 1)	//Will only connect if userName written
-				{
+				if(userName.getText().length() >= 1) {
 					Profile profile = getUserProfile();
-					ConnectionManager cm = new ConnectionManager(profile);
-					IRCEventHandler irc = new IRCEventHandler(cm.requestConnection(getChosenServer().getDns()), profile);
+					ConnectionManager conManager = new ConnectionManager(profile);
+					
+					Server server = LoadServers.this.getChosenServer();
+					int port = server.getAllowedPorts().contains(6667) ? 6667 : server.getAllowedPorts().firstElement();
+					
+					Session session = conManager.requestConnection(server.getDns(), port);
+					Launcher.getManager().createServerWindow(session);
 					
 					storeProfileData(profile);
 				}
@@ -288,33 +284,21 @@ public class LoadServers extends JFrame {
 		 * If no alternative nick supplied, or equals mainNick
 		 * Generates alternativeNickName
 		 */
-		if(alternate.length() < 1 || nick.contentEquals(alternate))	
-		{
+		if(alternate.length() < 1 || nick.contentEquals(alternate))	{
 			alternate = nick + "1";
 		}
 		
-		if(real.length() < 1) 
-		{
+		if(real.length() < 1) {
 			real = "hurradurradrp";
 		}
 		return new Profile(real,nick, alternate, (alternate+"2"));
 	}
+	
 	public Vector<Server> getServerList() {
 		return serverList;
 	}
+	
 	public Vector<String> getNetworkList() {
 		return networkList;
 	}
-
-	
-	public static void main(String Args[]) {
-
-		/*
-		 * FOR TESTING PURPOSES
-		 */
-		LoadServers servers = new LoadServers();
-		//JFrame serverWindow = new JFrame("Pick a server")		
-		
-	}
-
 }

@@ -1,10 +1,5 @@
 package com.theforce.programutviklingsepisodeV;
-import jerklib.Channel;
-import jerklib.ConnectionManager;
-import jerklib.Profile;
-import jerklib.Session;
 import jerklib.events.*;
-import jerklib.events.IRCEvent.Type;
 import jerklib.listeners.IRCEventListener;
 
 /**
@@ -16,118 +11,141 @@ import jerklib.listeners.IRCEventListener;
  */
 
 public class IRCEventHandler implements IRCEventListener{
-	Session session;
-	Profile profile;
-	Window window;
+	private ServerWindow mWindow;
 	
-	public IRCEventHandler(Session session, Profile profile, Window window)
-	{
-		this.session = session;
-		this.profile = profile;
-		this.session.addIRCEventListener(this);
-		this.window = window;
-	}
-	/**
-	 * Kicks a user from the IRC channel.
-	 * @param channel object with target channel
-	 * @param username string containing nick of person to be kicked
-	 * @param reason String where the user can specify reason for kick
-	 */
-	public void kickUser(Channel channel, String username, String reason)
-	{
-		/*
-		 * Implementer sjekk for rettigheter ?
-		 */
-		channel.kick(username, reason);
-	}
-	/**
-	 * Joins a new channel in the current session
-	 * @param channel String containing name of channel to join.
-	 */
-	public void joinChannel(String channel)
-	{
-		session.join(channel);
-	}
-	/**
-	 * Prints to session channel.	 
-	 * @param channel object of the channel to print to
-	 * @param out String containing what to print
-	 */
-	public void say( Channel channel, String out)
-	{
-		channel.say(out);
-	}
-	/**
-	 * Prevents a user from speaking in the channel
-	 * @param channel object containing the target channel
-	 * @param user string containing nick of user to mute
-	 */
-	public void mute(Channel channel, String user)
-	{
-		channel.deVoice(user);
-	}
-	/**
-	 * Allows a user to speaking in the channel
-	 * @param channel object containing the target channel
-	 * @param user string containing nick of user to unmute
-	 */
-	public void unMute(Channel channel, String user)
-	{
-		channel.voice(user);
+	public IRCEventHandler(ServerWindow pWindow) {
+		this.mWindow = pWindow;
 	}
 
 	/**
 	 * Handles Handles different events received through the IRC session
 	 */
 	@Override
-	
-	public void receiveEvent(IRCEvent event) {
-		// TODO Auto-generated method stub
-		if (event.getType() == Type.CONNECT_COMPLETE)
-		{
-			//(event.getSession()).join("#jerklibtest");
- 
+	public void receiveEvent(IRCEvent pEvent) {
+		switch(pEvent.getType()) {
+			case AWAY_EVENT:
+				break;
+			case CHANNEL_LIST_EVENT:
+				break;
+			case CHANNEL_MESSAGE:
+				{
+					MessageEvent event = (MessageEvent) pEvent;
+					ChannelWindow window = Launcher.getManager().findChannelWindow(event.getChannel());
+					if (window == null) {
+						window = Launcher.getManager().createChannelWindow(event.getChannel());
+					}
+					window.appendToChat(event.getNick() + ": " + event.getMessage());
+				}
+				break;
+			case CONNECTION_LOST:
+				this.mWindow.appendToChat("Connection lost!");
+				break;
+			case CONNECT_COMPLETE:
+				this.mWindow.setTitle(pEvent.getSession().getConnectedHostName());
+				break;
+			case CTCP_EVENT:
+				break;
+			case DCC_EVENT:
+				break;
+			case DEFAULT: // Unused
+				break;
+			case ERROR:
+				this.mWindow.appendToChat("Error event triggered!");
+				break;
+			case EXCEPTION: // Unused
+				break;
+			case INVITE_EVENT:
+				break;
+			case JOIN:
+				this.mWindow.appendToChat("Someone joined...");
+				break;
+			case JOIN_COMPLETE:
+				{
+					JoinCompleteEvent event = (JoinCompleteEvent) pEvent;
+					Launcher.getManager().createChannelWindow(event.getChannel());
+					this.mWindow.getSession();
+				}
+				break;
+			case KICK_EVENT:
+				{
+					KickEvent event = (KickEvent) pEvent;
+					ChannelWindow window = Launcher.getManager().findChannelWindow(event.getChannel());
+					if (window != null && !window.isClosed()) {
+						window.appendToChat(event.getUserName() + " was kicked from the channel (" + event.getMessage() + ")");
+					}
+				}
+				break;
+			case MODE_EVENT:
+				break;
+			case MOTD:
+				{
+					MotdEvent event = (MotdEvent) pEvent;
+					this.mWindow.appendToChat(event.getMotdLine());
+				}
+				break;
+			case NICK_CHANGE:
+				break;
+			case NICK_IN_USE:
+				{
+					NickInUseEvent event = (NickInUseEvent) pEvent; 
+					this.mWindow.appendToChat("Error: The nick \"" + event.getInUseNick() + "\" is in use already");
+				}
+				break;
+			case NICK_LIST_EVENT:
+				break;
+			case NOTICE:
+				{
+					NoticeEvent event = (NoticeEvent) pEvent;
+					if (event.getChannel() == null) { 
+						this.mWindow.appendToChat(event.getNoticeMessage());
+					}
+				}
+				break;
+			case PART:
+				{
+					PartEvent event = (PartEvent) pEvent;
+					ChannelWindow window = Launcher.getManager().findChannelWindow(event.getChannel());
+					if (window != null && !window.isClosed()) {
+						window.appendToChat(event.getUserName() + " left the channel (" + event.getPartMessage() + ")");
+					}
+				}
+				break;
+			case PRIVATE_MESSAGE:
+				{
+					MessageEvent event = (MessageEvent) pEvent;
+					QueryWindow window = Launcher.getManager().createQueryWindow(event.getSession(), event.getNick());
+					if (window == null) {
+						window = Launcher.getManager().createQueryWindow(event.getSession(), event.getNick());
+					}
+					window.appendToChat(event.getNick() + ": " + event.getMessage());
+				}
+				break;
+			case QUIT:
+				break;
+			case SERVER_INFORMATION:
+				break;
+			case SERVER_VERSION_EVENT:
+				break;
+			case TOPIC:
+				{
+					TopicEvent event = (TopicEvent) pEvent;
+					ChannelWindow window = Launcher.getManager().findChannelWindow(event.getChannel());
+					if (window != null) {
+						window.appendToChat(event.getSetBy() + " - " + event.getSetWhen() + " : " + event.getTopic());
+					}
+				}
+				break;
+			case UPDATE_HOST_NAME:
+				break;
+			case WHOIS_EVENT:
+				break;
+			case WHOWAS_EVENT:
+				break;
+			case WHO_EVENT:
+				break;
+			default:
+				break;
 		}
-		else if (event.getType() == Type.CHANNEL_MESSAGE)
-		{
-			MessageEvent me = (MessageEvent) event;
-			me.getChannel();
-			/**
-			 * HER MÅ DET KALLES EN FUNKSJON SOM SKRIVER DEN UT I TEXTAREAEN
-			 * 
-			 */
-			
-			System.out.println("<" + me.getNick() + ">"+ ":" + me.getMessage());
-		}
-		else if (event.getType() == Type.JOIN_COMPLETE)
-		{
-			JoinCompleteEvent jce = (JoinCompleteEvent) event;
-			jce.getChannel().say(profile.getName() + " has joined the channel.");
-		}
-		else if (event.getType() == Type.CONNECTION_LOST)
-		{
-			/* Serverwindow + channel window skriv ut error ... */
-			
-			/* eventuelt en reconnect algoritme */
-		}
-		
-		else if (event.getType() == Type.KICK_EVENT)
-		{
-			/* Disconect ting */
-		}
-		else if (event.getType() == Type.MOTD)
-		{
-			/* Channel skriv ut MOTD; */
-		}
-		else if (event.getType() == Type.PRIVATE_MESSAGE)
-		{
-			/* Åpne nytt vindu med privchat */
-		}
-		else if (event.getType() == Type.CTCP_EVENT)
-		{
-			/* Åpne nytt vindu med privchat */
-		}
-		//if (event.getType() == Type.
 	}
 
 }

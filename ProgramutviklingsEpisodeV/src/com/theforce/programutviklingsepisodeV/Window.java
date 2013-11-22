@@ -1,6 +1,7 @@
 package com.theforce.programutviklingsepisodeV;
 
 import javax.swing.*;
+import javax.swing.event.InternalFrameEvent;
 import javax.swing.text.*;
 
 import java.awt.*;
@@ -11,13 +12,23 @@ import java.awt.event.ActionListener;
 abstract class Window extends JInternalFrame {
 	protected JTextPane mChat;
 	protected JTextField mCli; // Command line interface
+	@SuppressWarnings("rawtypes")
 	protected JList mUsers;
 	protected String mChatLines = new String();
 	protected Component mUpper;
 	protected JSplitPane mWindow;
+	protected JButton mToolbarRef;
 	
+	@SuppressWarnings("rawtypes")
 	public Window(String title, boolean showUsersInterface) {
 		super(title, true, true, true, true);
+		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		this.addInternalFrameListener(new javax.swing.event.InternalFrameAdapter() {
+			@Override
+			public void internalFrameClosed(InternalFrameEvent e) {
+				((Window) e.getInternalFrame()).onClose();
+			}
+		});
 		// Create content area
 		this.mChat = new JTextPane();
 		
@@ -87,17 +98,29 @@ abstract class Window extends JInternalFrame {
 	
 	abstract public void commandParser();
 	
+	protected void onClose() {
+		// Remove toolbar button
+		this.mToolbarRef.getParent().remove(this.mToolbarRef);
+		this.mToolbarRef = null;
+		
+		// Remove from window manager
+		Launcher.getManager().RemoveWindow(this);
+	};
+	
+	public void setToolbarReference(JButton ref) {
+		this.mToolbarRef = ref;
+	}
+	
 	public void appendToChat(String line) {
 		try {
 			// Should sanitize line, and make sure its placed on a new line, before inserting it
-			this.mChatLines += line;
+			this.mChatLines += line + "\n";
 			
 	        SimpleAttributeSet attrs = new SimpleAttributeSet();
 	        StyleConstants.setAlignment(attrs, StyleConstants.ALIGN_LEFT);
 			
 			StyledDocument doc = (StyledDocument) this.mChat.getDocument();
-			doc.insertString(0, this.mChatLines, attrs);
-			doc.setParagraphAttributes(0, doc.getLength() - 1, attrs, false);
+			doc.insertString(doc.getLength(), "\n" + line, attrs);
 		} 
 		
 		catch (Exception e) {
@@ -107,6 +130,12 @@ abstract class Window extends JInternalFrame {
 	
 	public String getCommandLine() {
 		return this.mCli.getText();
+	}
+	
+	@Override
+	public void setTitle(String title) {
+		super.setTitle(title);
+		this.mToolbarRef.setText(title);
 	}
 }
 

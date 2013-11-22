@@ -1,17 +1,23 @@
 package com.theforce.programutviklingsepisodeV;
 
+import java.awt.BorderLayout;
 import java.util.ArrayList;
+import java.util.List;
 
+import javax.swing.BoxLayout;
 import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
-import javax.swing.JInternalFrame;
+import javax.swing.JPanel;
+
 import jerklib.Channel;
 import jerklib.Session;
 
 @SuppressWarnings("serial")
 public class WindowManager extends JFrame {
 	private JDesktopPane mFrame;
-	private ArrayList<JInternalFrame> mWindows;
+	private ActionToolbar mActionToolbar;
+	private WindowToolbar mWindowToolbar;
+	private ArrayList<Window> mWindows = new ArrayList<Window>();
 	public WindowManager() {
 		super();
 		// Create frame
@@ -26,16 +32,31 @@ public class WindowManager extends JFrame {
 		// Add window manager to frame
 		this.add(this.mFrame);
 		
-		// Create window container
-		this.mWindows = new ArrayList<JInternalFrame>();
+		// Add toolbar panel
+		JPanel toolbarPanel = new JPanel();
+		toolbarPanel.setLayout(new BoxLayout(toolbarPanel, BoxLayout.Y_AXIS));
+		
+		// Add action toolbar
+		this.mActionToolbar = new ActionToolbar();
+		this.mActionToolbar.setFloatable(false);
+		this.mActionToolbar.setAlignmentX(0);
+		toolbarPanel.add(this.mActionToolbar);
+		
+		// Add window toolbar
+		this.mWindowToolbar = new WindowToolbar();
+		this.mWindowToolbar.setFloatable(false);
+		this.mWindowToolbar.setAlignmentX(0);
+		toolbarPanel.add(this.mWindowToolbar);
+		
+		// Add toolbar panel to layout
+		this.add(toolbarPanel, BorderLayout.NORTH);
 	}
 	
 	private void setupWindow(Window window) {
-		// Create contents of window
-		this.mWindows.add(window);
-		//window.pack();
-		
 		// Add window to manager
+		this.mWindows.add(window);
+		
+		// Put the window into the frame
 		this.mFrame.add(window);
 		
 		// Set window position
@@ -48,18 +69,57 @@ public class WindowManager extends JFrame {
 		window.setVisible(true);
 	}
 	
-	public void createServerWindow(Session pSession) {
+	public ServerWindow createServerWindow(Session pSession) {
 		ServerWindow window = new ServerWindow(pSession);
 		this.setupWindow(window);
+		this.mWindowToolbar.addWindow(window);
+		return window;
 	}
 	
-	public void createChannelWindow(Channel pChannel) {
+	public ChannelWindow createChannelWindow(Channel pChannel) {
 		ChannelWindow window = new ChannelWindow(pChannel);
 		this.setupWindow(window);
+		this.mWindowToolbar.addWindow(window);
+		return window;
 	}
 	
-	public void createQueryWindow(Session pSession, String pNickname) {
+	public QueryWindow createQueryWindow(Session pSession, String pNickname) {
 		QueryWindow window = new QueryWindow(pSession, pNickname);
 		this.setupWindow(window);
+		this.mWindowToolbar.addWindow(window);
+		return window;
+	}
+	
+	public ChannelWindow findChannelWindow(Channel pChannel) {
+		for (Window window : this.mWindows) {
+			if (window instanceof ChannelWindow && ((ChannelWindow)window).getChannel().equals(pChannel)) {
+				return (ChannelWindow)window;
+			}
+		}
+		return null;
+	}
+	
+	public List<ChannelWindow> findChannelWindows(Session pSession) {
+		List<ChannelWindow> windows = new ArrayList<ChannelWindow>();
+		for (Window window : this.mWindows) {
+			if (window instanceof ChannelWindow && ((ChannelWindow)window).getChannel().getSession().equals(pSession)) {
+				windows.add((ChannelWindow)window);
+			}
+		}
+		return windows;
+	}
+	
+	public ServerWindow findServerWindow(Session pSession) {
+		for (Window window : this.mWindows) {
+			if (window instanceof ServerWindow && ((ServerWindow)window).getSession().equals(pSession)) {
+				return (ServerWindow)window;
+			}
+		}
+		return null;
+	}
+	
+	public void RemoveWindow(Window pWindow) {
+		this.mWindows.remove(pWindow);
+		if (!pWindow.isClosed()) { pWindow.dispose(); }
 	}
 }

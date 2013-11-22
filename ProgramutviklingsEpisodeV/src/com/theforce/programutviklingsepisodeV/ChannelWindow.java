@@ -13,11 +13,23 @@ public class ChannelWindow extends Window {
 	@Override
 	public void commandParser() {
 		if (this.mCli.getText().charAt(0) == '/') {
-			this.mChannel.action(this.mCli.getText().substring(1));
+			//
 		}
 		
 		else {
 			this.mChannel.say(this.mCli.getText());
+			this.appendToChat(this.mChannel.getSession().getNick() + " : " + this.mCli.getText());
 		}
+		this.mCli.setText("");
+	}
+	
+	public Channel getChannel() {
+		return this.mChannel;
+	}
+	
+	@Override
+	protected void onClose() {
+		this.mChannel.part("");
+		super.onClose();
 	}
 }

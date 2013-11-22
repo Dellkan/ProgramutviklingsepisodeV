@@ -1,27 +1,26 @@
 package com.theforce.programutviklingsepisodeV;
 
-import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JToolBar;
 
 @SuppressWarnings("serial")
-public class Toolbar extends JToolBar {
-	public Toolbar() {
-		Launcher.getManager().add(this, BorderLayout.NORTH);
+public class ActionToolbar extends JToolBar {
+	public ActionToolbar() {
 		// Create buffer variables
 		JButton button;
 		
 		// Create standard toolbar
 		// New
-        button = new JButton("Create new window");
+		
+        button = new JButton("Connect to server", new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("connect.png")));
         button.setToolTipText("Create new window");
         button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
                 // New
-            	//Launcher.getManager().createChannel("test", false);
+            	new LoadServers();
             }
         });
         this.add(button);
