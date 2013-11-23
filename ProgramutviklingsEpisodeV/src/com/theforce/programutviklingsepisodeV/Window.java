@@ -7,6 +7,10 @@ import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Arrays;
+import java.util.List;
+
+import jerklib.Session;
 
 @SuppressWarnings("serial")
 abstract class Window extends JInternalFrame {
@@ -18,10 +22,12 @@ abstract class Window extends JInternalFrame {
 	protected Component mUpper;
 	protected JSplitPane mWindow;
 	protected JButton mToolbarRef;
+	private Session mSession;
 	
 	@SuppressWarnings("rawtypes")
-	public Window(String title, boolean showUsersInterface) {
+	public Window(Session session, String title, boolean showUsersInterface) {
 		super(title, true, true, true, true);
+		this.mSession = session;
 		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		this.addInternalFrameListener(new javax.swing.event.InternalFrameAdapter() {
 			@Override
@@ -96,7 +102,59 @@ abstract class Window extends JInternalFrame {
         }
 	}
 	
-	abstract public void commandParser();
+	protected void commandParser() {
+		if (this.mCli.getText().charAt(0) == '/') {
+			try {
+				List<String> cli = Arrays.asList(this.mCli.getText().split(" "));
+				if (!cli.isEmpty()) {
+					String command = cli.get(0);
+					switch(command)
+					{
+						case "/join" :
+							if(cli.get(1).startsWith("#")) { 
+								this.getSession().join(cli.get(1));
+							}
+							
+							else {
+								this.appendToChat("Channel names must start with #"); // Says who? See http://jerklib.sourceforge.net/doc/jerklib/ServerInformation.html#getChannelPrefixes()
+							}
+							break;
+						case "/msg":
+							{
+								// Find window if it exists
+								QueryWindow window = Launcher.getManager().findQueryWindow(this.getSession(), cli.get(1));
+								if (window == null) {
+									// Create the window if it doesn't
+									window = Launcher.getManager().createQueryWindow(this.getSession(), cli.get(1));
+								}
+								
+								// Add the text
+								window.appendToChat(this.getSession().getNick() + ": " + cli.get(2));
+								
+								// Send the text to server
+								String msg = this.mCli.getText().split(" ", 3)[2];
+								this.getSession().sayPrivate(cli.get(1), msg);
+							}
+							break;
+						case "/help" :
+							this.appendToChat("The available commands are:\r\n"
+									+ "/help\t\t-\tDisplays a list of avalible commands.\r\n"
+									+ "/msg [USER][MESSAGE]\t-\tSends a private message to a user.\r\n"
+									+ "/join [#CHANNEL]\t-\tJoins a channel, must start with #.");
+							break;
+						default : this.appendToChat("Error this command does not exist. For a list of commands type /help");
+					}
+				}
+			}
+			
+			catch (Exception e) { }
+		}
+		
+		else {
+			this.appendToChat("Can't chat here!");
+		}
+		this.mCli.setText("");
+	}
 	
 	protected void onClose() {
 		// Remove toolbar button
@@ -136,6 +194,10 @@ abstract class Window extends JInternalFrame {
 	public void setTitle(String title) {
 		super.setTitle(title);
 		this.mToolbarRef.setText(title);
+	}
+	
+	public Session getSession() {
+		return this.mSession;
 	}
 }
 

@@ -86,8 +86,8 @@ public class LoadServers extends JFrame {
 
 		showNetworks();
 		showServers(networkList.firstElement());
-		loadProfileData();
 		createAndShowGUI();
+		loadProfileData();
 		this.pack();
 	}
 
