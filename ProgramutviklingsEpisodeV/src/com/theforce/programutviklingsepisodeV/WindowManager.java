@@ -90,6 +90,18 @@ public class WindowManager extends JFrame {
 		return window;
 	}
 	
+	public QueryWindow findQueryWindow(Session pSession, String pNick) {
+		for (Window window : this.mWindows) {
+			if (window instanceof QueryWindow) {
+				QueryWindow queryWindow = (QueryWindow) window;  
+				if (queryWindow.getSession().equals(pSession) && queryWindow.getNick().equals(pNick)) {
+					return (QueryWindow)window;
+				}
+			}
+		}
+		return null;
+	}
+	
 	public ChannelWindow findChannelWindow(Channel pChannel) {
 		for (Window window : this.mWindows) {
 			if (window instanceof ChannelWindow && ((ChannelWindow)window).getChannel().equals(pChannel)) {

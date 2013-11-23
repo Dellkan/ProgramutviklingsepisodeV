@@ -113,7 +113,7 @@ public class IRCEventHandler implements IRCEventListener{
 			case PRIVATE_MESSAGE:
 				{
 					MessageEvent event = (MessageEvent) pEvent;
-					QueryWindow window = Launcher.getManager().createQueryWindow(event.getSession(), event.getNick());
+					QueryWindow window = Launcher.getManager().findQueryWindow(event.getSession(), event.getNick());
 					if (window == null) {
 						window = Launcher.getManager().createQueryWindow(event.getSession(), event.getNick());
 					}
