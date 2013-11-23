@@ -25,12 +25,45 @@ public class ServerWindow extends Window {
 	public void commandParser() {
 		if (this.mCli.getText().charAt(0) == '/') {
 			try {
-				List<String> cli = Arrays.asList(this.mCli.getText().split(" "));
+				List<String> cli = Arrays.asList(this.mCli.getText().split(" ",3));
 				if (!cli.isEmpty()) {
+					String command = cli.get(0);
+					switch(command)
+					{
+						case "/join" :
+							if(cli.get(1).startsWith("#")) 
+								this.mSession.join(cli.get(1));
+							else
+								this.appendToChat("Channel names must start with #");
+							break;
+						
+						
+						case "/msg" :
+							this.mSession.sayPrivate(cli.get(1), cli.get(2));
+							/*
+							 * Lacks creating a new window.
+							 */
+							break;
+							
+						case "" :
+							
+							break;
+							
+						case "/help" :
+							this.appendToChat("The availible commands are:\r\n"
+									+ "/help\t\t-\tDisplays a list of avalible commands.\r\n"
+									+ "/msg [USER][MESSAGE]\t-\tSends a private message to a user.\r\n"
+									+ "/join [#CHANNEL]\t-\tJoins a channel, must start with #.");
+							break;
+							
+						default : this.appendToChat("Error this command does not exist. For a list of commands type /help");
+					}
+					
+					/*
 					if (cli.get(0).startsWith("/join")) {
 						String channelName = cli.get(1);
 						this.mSession.join(channelName);
-					}
+					}*/
 				}
 			}
 			
