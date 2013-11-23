@@ -9,6 +9,18 @@ import javax.swing.JToolBar;
 
 @SuppressWarnings("serial")
 public class WindowToolbar extends JToolBar {
+	private class WindowButton extends JButton {
+		private Window mWindow;
+		public WindowButton(String pTitle, ImageIcon pIcon, Window pWindow) {
+			super(pTitle, pIcon);
+			this.mWindow = pWindow;
+		}
+		
+		public Window getWindow() {
+			return this.mWindow;
+		}
+	}
+	
 	private JButton setupWindow(Window pWindow, String title, String iconPath) {
 		// Create icon
 		URL iconURL = Thread.currentThread().getContextClassLoader().getResource(iconPath);
@@ -17,15 +29,14 @@ public class WindowToolbar extends JToolBar {
 			icon = new ImageIcon(iconURL);
 		}
 		
-		// Create text
-		//JLabel label = new JLabel(title, icon, JLabel.LEFT);
-		
 		// Create button
-        JButton button = new JButton(title, icon);
+        JButton button = new WindowButton(title, icon, pWindow);
         button.setToolTipText(title);
         button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
-                
+            	Window window = ((WindowButton)event.getSource()).getWindow();
+                window.toFront();
+                window.getCLI().requestFocusInWindow();
             }
         });
         this.add(button);

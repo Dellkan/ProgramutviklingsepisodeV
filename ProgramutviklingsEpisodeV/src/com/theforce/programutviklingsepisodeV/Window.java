@@ -169,6 +169,10 @@ abstract class Window extends JInternalFrame {
 		this.mToolbarRef = ref;
 	}
 	
+	public JTextField getCLI() {
+		return this.mCli;
+	}
+	
 	public void appendToChat(String line) {
 		try {
 			// Should sanitize line, and make sure its placed on a new line, before inserting it
