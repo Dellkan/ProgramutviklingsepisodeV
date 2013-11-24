@@ -1,24 +1,23 @@
 package com.theforce.programutviklingsepisodeV;
-/*
+/**
  * @author Jehans Storvik
  * @author John Høegh Omdal
  * @author Martin Bragen
  */
 import java.io.Serializable;
+
 import java.util.Vector;
-/*
+
+/**
  * A server helperclass which will read one server from a file.
  */
 public class Server implements Serializable {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private String networkNumber;
 	private String location;
 	private String dns;
 	private Vector<Integer>allowedPorts = new Vector<Integer>();
-	private String network;	//Kan gjøres om til enum
+	private String network;	
 	
 	
 	Server(String srvInfo)	{
