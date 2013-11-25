@@ -52,6 +52,14 @@ public class WindowManager extends JFrame {
 		this.add(toolbarPanel, BorderLayout.NORTH);
 	}
 	
+	public ActionToolbar getActionToolbar() {
+		return this.mActionToolbar;
+	}
+	
+	public WindowToolbar getWindowToolbar() {
+		return this.mWindowToolbar;
+	}
+	
 	private void setupWindow(Window window) {
 		// Add window to manager
 		this.mWindows.add(window);

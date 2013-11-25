@@ -14,11 +14,12 @@ import jerklib.Session;
 
 @SuppressWarnings("serial")
 abstract class Window extends JInternalFrame {
+	private JScrollPane mChatScroller;
 	protected JTextPane mChat;
+	protected String mChatLines = new String();
 	protected JTextField mCli; // Command line interface
 	@SuppressWarnings("rawtypes")
 	protected JList mUsers;
-	protected String mChatLines = new String();
 	protected Component mUpper;
 	protected JSplitPane mWindow;
 	protected JButton mToolbarRef;
@@ -43,7 +44,7 @@ abstract class Window extends JInternalFrame {
         	this.mChat.setEditorKit(new ChatWindowEditorKit());
         	this.mChat.setEditable(false);
 		
-			JScrollPane chatScroller = new JScrollPane(this.mChat);
+			this.mChatScroller = new JScrollPane(this.mChat);
 			
 	        // Create the split pane that will contain chat window, and user list
 	        
@@ -51,20 +52,22 @@ abstract class Window extends JInternalFrame {
 	        if (showUsersInterface) {
 				this.mUsers = new JList();
 				this.mUsers.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-				this.mUsers.setLayoutOrientation(JList.HORIZONTAL_WRAP);
+				this.mUsers.setLayoutOrientation(JList.VERTICAL);
 				this.mUsers.setVisibleRowCount(-1);
-				this.mUsers.setMinimumSize(new Dimension(75, 100));
+				this.mUsers.setMinimumSize(new Dimension(100, 100));
 				this.mUsers.setPreferredSize(new Dimension(125, 0));
 				
 				JScrollPane userScroller = new JScrollPane(this.mUsers);
+				userScroller.setMinimumSize(new Dimension(50, 150));
 				userScroller.setPreferredSize(new Dimension(100, 150));
+				userScroller.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 				
-				this.mUpper = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, chatScroller, userScroller);
+				this.mUpper = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, this.mChatScroller, userScroller);
 				((JSplitPane)this.mUpper).setResizeWeight(1);
 	        }
 	        
 	        else {
-	        	this.mUpper = chatScroller;
+	        	this.mUpper = this.mChatScroller;
 	        }
 			
 			// Create command line interface (textbox)
@@ -111,12 +114,14 @@ abstract class Window extends JInternalFrame {
 					switch(command)
 					{
 						case "/join" :
-							if(cli.get(1).startsWith("#")) { 
+							if(this.getSession().isChannelToken(cli.get(1))) { 
 								this.getSession().join(cli.get(1));
 							}
 							
 							else {
-								this.appendToChat("Channel names must start with #"); // Says who? See http://jerklib.sourceforge.net/doc/jerklib/ServerInformation.html#getChannelPrefixes()
+								this.appendToChat("Channel names must start with one of " + 
+									Arrays.asList(this.getSession().getServerInformation().getChannelPrefixes()).toString()
+								);
 							}
 							break;
 						case "/msg":
@@ -136,7 +141,12 @@ abstract class Window extends JInternalFrame {
 								this.getSession().sayPrivate(cli.get(1), msg);
 							}
 							break;
-						case "/help" :
+						case "/nick":
+							{
+								this.getSession().changeNick(cli.get(1));
+							}
+							break;
+						case "/help":
 							this.appendToChat("The available commands are:\r\n"
 									+ "/help\t\t-\tDisplays a list of avalible commands.\r\n"
 									+ "/msg [USER][MESSAGE]\t-\tSends a private message to a user.\r\n"
@@ -159,6 +169,8 @@ abstract class Window extends JInternalFrame {
 	protected void onClose() {
 		// Remove toolbar button
 		this.mToolbarRef.getParent().remove(this.mToolbarRef);
+		Launcher.getManager().getWindowToolbar().revalidate();
+		Launcher.getManager().getWindowToolbar().repaint();
 		this.mToolbarRef = null;
 		
 		// Remove from window manager
@@ -175,6 +187,10 @@ abstract class Window extends JInternalFrame {
 	
 	public void appendToChat(String line) {
 		try {
+			// Figure out if we should rescroll
+			JScrollBar chatScroller = this.mChatScroller.getVerticalScrollBar();
+			boolean rescroll = chatScroller.getValue() + chatScroller.getVisibleAmount() >= chatScroller.getMaximum();
+			
 			// Should sanitize line, and make sure its placed on a new line, before inserting it
 			this.mChatLines += line + "\n";
 			
@@ -183,6 +199,15 @@ abstract class Window extends JInternalFrame {
 			
 			StyledDocument doc = (StyledDocument) this.mChat.getDocument();
 			doc.insertString(doc.getLength(), "\n" + line, attrs);
+			
+			// Adjust scrollbar if applicable
+			if (rescroll) {
+				SwingUtilities.invokeLater(new Runnable() {
+					public void run() {
+						Window.this.mChatScroller.getVerticalScrollBar().setValue(Window.this.mChatScroller.getVerticalScrollBar().getMaximum());
+					}
+				});
+			}
 		} 
 		
 		catch (Exception e) {
