@@ -1,6 +1,5 @@
 package com.theforce.programutviklingsepisodeV;
 import jerklib.events.*;
-import jerklib.events.modes.ModeAdjustment;
 import jerklib.events.modes.ModeEvent;
 import jerklib.listeners.IRCEventListener;
 
@@ -165,7 +164,7 @@ public class IRCEventHandler implements IRCEventListener{
 			case NOTICE:
 				{
 					NoticeEvent event = (NoticeEvent) pEvent;
-					if (event.getChannel() ==c null) { 
+					if (event.getChannel() == null) { 
 						this.mWindow.appendToChat(event.getNoticeMessage());
 					}
 				}
