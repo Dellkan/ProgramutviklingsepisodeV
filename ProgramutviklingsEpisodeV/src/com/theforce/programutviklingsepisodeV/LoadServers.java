@@ -47,7 +47,6 @@ public class LoadServers extends JFrame {
 		this.setMinimumSize(new Dimension(600,300));
 		this.setLayout(new GridBagLayout());	
 		setVisible(true);
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		BufferedReader br = null;
 		try 

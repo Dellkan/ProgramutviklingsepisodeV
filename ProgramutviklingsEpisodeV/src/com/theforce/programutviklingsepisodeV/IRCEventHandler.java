@@ -1,5 +1,7 @@
 package com.theforce.programutviklingsepisodeV;
 import jerklib.events.*;
+import jerklib.events.modes.ModeAdjustment;
+import jerklib.events.modes.ModeEvent;
 import jerklib.listeners.IRCEventListener;
 
 /**
@@ -24,6 +26,7 @@ public class IRCEventHandler implements IRCEventListener{
 	public void receiveEvent(IRCEvent pEvent) {
 		switch(pEvent.getType()) {
 			case AWAY_EVENT:
+				System.out.println("AWAY_EVENT");
 				break;
 			case CHANNEL_LIST_EVENT:
 				break;
@@ -44,26 +47,38 @@ public class IRCEventHandler implements IRCEventListener{
 				this.mWindow.setTitle(pEvent.getSession().getConnectedHostName());
 				break;
 			case CTCP_EVENT:
+				this.mWindow.appendToChat("CTCP_EVENT");
 				break;
 			case DCC_EVENT:
+				this.mWindow.appendToChat("DCC");
 				break;
 			case DEFAULT: // Unused
 				break;
 			case ERROR:
-				this.mWindow.appendToChat("Error event triggered!");
+				{
+					ErrorEvent event = (ErrorEvent) pEvent;
+					this.mWindow.appendToChat("Error triggered: " + event.getErrorType().toString());
+				}
 				break;
 			case EXCEPTION: // Unused
 				break;
 			case INVITE_EVENT:
+				System.out.println("INVITE_EVENT");
 				break;
 			case JOIN:
-				this.mWindow.appendToChat("Someone joined...");
+				{
+					JoinEvent event = (JoinEvent) pEvent;
+					ChannelWindow window = Launcher.getManager().findChannelWindow(event.getChannel());
+					if (window != null && !window.isClosed()) {
+						window.appendToChat(event.getNick() + " joined the channel");
+						window.updateUserList();
+					}
+				}
 				break;
 			case JOIN_COMPLETE:
 				{
 					JoinCompleteEvent event = (JoinCompleteEvent) pEvent;
 					Launcher.getManager().createChannelWindow(event.getChannel());
-					this.mWindow.getSession();
 				}
 				break;
 			case KICK_EVENT:
@@ -72,10 +87,41 @@ public class IRCEventHandler implements IRCEventListener{
 					ChannelWindow window = Launcher.getManager().findChannelWindow(event.getChannel());
 					if (window != null && !window.isClosed()) {
 						window.appendToChat(event.getUserName() + " was kicked from the channel (" + event.getMessage() + ")");
+						window.updateUserList();
 					}
 				}
 				break;
 			case MODE_EVENT:
+				{
+					ModeEvent event = (ModeEvent) pEvent;
+					if (event.getModeType() == ModeEvent.ModeType.USER) {
+						if (event.setBy().length() > 0) {
+							this.mWindow.appendToChat(
+								event.setBy() + " sets mode: " + 
+								event.getModeAdjustments().toString() + " " + 
+								event.getSession().getNick()
+							);
+						}
+						
+						else {
+							this.mWindow.appendToChat("Server sets mode: " + event.getModeAdjustments().toString());
+						}
+					}
+					
+					else {
+						ChannelWindow window = Launcher.getManager().findChannelWindow(event.getChannel());
+						if (window != null && !window.isClosed()) {
+							if (event.setBy().length() > 0) {
+								window.appendToChat(event.setBy() + " sets mode: " + event.getModeAdjustments().toString());
+							}
+							
+							else {
+								window.appendToChat("Server sets mode: " + event.getModeAdjustments().toString());
+							}
+							window.updateUserList();
+						}
+					}
+				}
 				break;
 			case MOTD:
 				{
@@ -84,6 +130,28 @@ public class IRCEventHandler implements IRCEventListener{
 				}
 				break;
 			case NICK_CHANGE:
+				{
+					NickChangeEvent event = (NickChangeEvent) pEvent;
+					// Update channel windows
+					for (ChannelWindow window : Launcher.getManager().findChannelWindows(event.getSession())) {
+						if (window.getChannel().getNicks().contains(event.getNewNick())) {
+							window.appendToChat(event.getOldNick() + " changed nick to " + event.getNewNick());
+							window.updateUserList();
+						}
+					}
+						
+					// Update query windows (will only work if in the same channel too)
+					QueryWindow window = Launcher.getManager().findQueryWindow(event.getSession(), event.getOldNick());
+					if (window != null && !window.isClosed()) {
+						window.setNick(event.getNewNick());
+						window.appendToChat(event.getOldNick() + " changed nick to " + event.getNewNick());
+					}
+					
+					// If we are changing nick ourselves, update server status window
+					if (event.getSession().getNick().equals(event.getNewNick())) {
+						this.mWindow.appendToChat("You are now known as " + event.getNewNick());
+					}
+				}
 				break;
 			case NICK_IN_USE:
 				{
@@ -92,11 +160,12 @@ public class IRCEventHandler implements IRCEventListener{
 				}
 				break;
 			case NICK_LIST_EVENT:
+				System.out.println("NICK_LIST_EVENT");
 				break;
 			case NOTICE:
 				{
 					NoticeEvent event = (NoticeEvent) pEvent;
-					if (event.getChannel() == null) { 
+					if (event.getChannel() ==c null) { 
 						this.mWindow.appendToChat(event.getNoticeMessage());
 					}
 				}
@@ -107,6 +176,7 @@ public class IRCEventHandler implements IRCEventListener{
 					ChannelWindow window = Launcher.getManager().findChannelWindow(event.getChannel());
 					if (window != null && !window.isClosed()) {
 						window.appendToChat(event.getUserName() + " left the channel (" + event.getPartMessage() + ")");
+						window.updateUserList();
 					}
 				}
 				break;
@@ -121,10 +191,16 @@ public class IRCEventHandler implements IRCEventListener{
 				}
 				break;
 			case QUIT:
+				System.out.println("QUIT");
 				break;
 			case SERVER_INFORMATION:
+				// Do nothing for now
 				break;
 			case SERVER_VERSION_EVENT:
+				{
+					ServerVersionEvent event = (ServerVersionEvent) pEvent; 
+					this.mWindow.appendToChat(event.getComment());
+				}
 				break;
 			case TOPIC:
 				{
@@ -136,12 +212,16 @@ public class IRCEventHandler implements IRCEventListener{
 				}
 				break;
 			case UPDATE_HOST_NAME:
+				System.out.println("UPDATE_HOST_NAME");
 				break;
 			case WHOIS_EVENT:
+				System.out.println("WHOIS_EVENT");
 				break;
 			case WHOWAS_EVENT:
+				System.out.println("WHOWAS_EVENT");
 				break;
 			case WHO_EVENT:
+				System.out.println("WHO_EVENT");
 				break;
 			default:
 				break;

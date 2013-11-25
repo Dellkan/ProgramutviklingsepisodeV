@@ -8,9 +8,13 @@ import jerklib.Channel;
 @SuppressWarnings("serial")
 public class ChannelWindow extends Window {
 	private Channel mChannel; 
+	@SuppressWarnings("unchecked")
 	public ChannelWindow(Channel pChannel) {
 		super(pChannel.getSession(), pChannel.getName(), true);
 		this.mChannel = pChannel;
+		
+		// Set up user stuff
+		this.mUsers.setModel(new UserList(this.getChannel()));
 	}
 
 	@Override
@@ -36,6 +40,10 @@ public class ChannelWindow extends Window {
 	
 	public Channel getChannel() {
 		return this.mChannel;
+	}
+	
+	public void updateUserList() {
+		((UserList) this.mUsers.getModel()).update();
 	}
 	
 	@Override

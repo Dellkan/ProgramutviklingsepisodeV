@@ -35,6 +35,11 @@ public class QueryWindow extends Window {
 		return this.mNickname;
 	}
 	
+	public void setNick(String pNick) {
+		this.mNickname = pNick;
+		this.setTitle("PM: " + pNick);
+	}
+	
 	@Override
 	protected void onClose() {
 		super.onClose();
