@@ -13,7 +13,7 @@ public class ServerWindow extends Window {
 		this.getSession().addIRCEventListener(new IRCEventHandler(this));
 		
 		// Give user some feedback
-		this.appendToChat("Connecting to " + pSession.getRequestedConnection().getHostName() + "...");
+		this.appendToChat(new ChatText().addSystemMessage("Connecting to " + pSession.getRequestedConnection().getHostName() + "..."));
 	}
 	
 	@Override

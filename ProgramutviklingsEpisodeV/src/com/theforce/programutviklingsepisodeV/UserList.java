@@ -7,7 +7,7 @@ import java.util.Map;
 import javax.swing.AbstractListModel;
 
 import jerklib.Channel;
-import jerklib.events.modes.ModeAdjustment;
+import jerklib.ModeAdjustment;
 
 @SuppressWarnings({ "serial", "rawtypes" })
 public class UserList extends AbstractListModel {

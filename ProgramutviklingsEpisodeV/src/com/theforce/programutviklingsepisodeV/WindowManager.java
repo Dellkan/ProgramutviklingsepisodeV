@@ -60,6 +60,10 @@ public class WindowManager extends JFrame {
 		return this.mWindowToolbar;
 	}
 	
+	public List<Window> getAllWindows() {
+		return this.mWindows;
+	}
+	
 	private void setupWindow(Window window) {
 		// Add window to manager
 		this.mWindows.add(window);
@@ -102,7 +106,7 @@ public class WindowManager extends JFrame {
 		for (Window window : this.mWindows) {
 			if (window instanceof QueryWindow) {
 				QueryWindow queryWindow = (QueryWindow) window;  
-				if (queryWindow.getSession().equals(pSession) && queryWindow.getNick().equals(pNick)) {
+				if (queryWindow.getSession().equals(pSession) && queryWindow.getNick().equalsIgnoreCase(pNick)) {
 					return (QueryWindow)window;
 				}
 			}

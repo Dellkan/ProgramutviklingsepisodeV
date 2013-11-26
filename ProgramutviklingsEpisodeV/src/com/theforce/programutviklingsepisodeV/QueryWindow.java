@@ -26,7 +26,12 @@ public class QueryWindow extends Window {
 		
 		else {
 			this.getSession().sayPrivate(this.getNick(), this.mCli.getText()); 
-			this.appendToChat(this.getSession().getNick() + " : " + this.mCli.getText());
+			
+			// Create local copy
+			this.appendToChat(new ChatText() // TODO: Check that message is sent
+				.addNickname(this.getSession().getNick())
+				.addText(": " + this.mCli.getText())
+			);
 		}
 		this.mCli.setText("");
 	}

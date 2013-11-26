@@ -7,16 +7,18 @@ import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Arrays;
 import java.util.List;
 
+import jerklib.Channel;
 import jerklib.Session;
 
 @SuppressWarnings("serial")
 abstract class Window extends JInternalFrame {
 	private JScrollPane mChatScroller;
 	protected JTextPane mChat;
-	protected String mChatLines = new String();
 	protected JTextField mCli; // Command line interface
 	@SuppressWarnings("rawtypes")
 	protected JList mUsers;
@@ -43,6 +45,35 @@ abstract class Window extends JInternalFrame {
         	// Set up editor
         	this.mChat.setEditorKit(new ChatWindowEditorKit());
         	this.mChat.setEditable(false);
+        	
+        	// Add style we can later change around a bit
+        	this.mChat.addStyle("IRCChatStyle", null);
+        	
+        	// Add actionListener to chat window
+        	this.mChat.addMouseListener(new MouseAdapter() {
+        		@Override
+        		public void mouseClicked(MouseEvent e) {
+        			AttributeSet attributes = 
+        				// Get document attached to the clicked point
+        				((DefaultStyledDocument) ((JTextPane) e.getSource()).getDocument())
+        				// Get element
+        				.getCharacterElement(
+        					// Search for the element at the x, y coordinates of the click
+        					((JTextPane) e.getSource()).viewToModel(
+        						new Point(e.getX(), e.getY())
+        					)
+        				)
+        				// Get the attributes of that element
+        				.getAttributes();
+        			ChatText.Type textType = (ChatText.Type) attributes.getAttribute("type");
+        			ExtendedText textRaw = (ExtendedText) attributes.getAttribute("ExtendedText");
+        			if (textType != null) {
+        				if (textType == (ChatText.Type.NICKNAME)) {
+        					Window.this.getCLI().setText("/msg " + textRaw.getRaw());
+        				}
+        			}
+        		}
+        	});
 		
 			this.mChatScroller = new JScrollPane(this.mChat);
 			
@@ -106,6 +137,7 @@ abstract class Window extends JInternalFrame {
 	}
 	
 	protected void commandParser() {
+		ChatText output = new ChatText();
 		if (this.mCli.getText().charAt(0) == '/') {
 			try {
 				List<String> cli = Arrays.asList(this.mCli.getText().split(" "));
@@ -113,17 +145,107 @@ abstract class Window extends JInternalFrame {
 					String command = cli.get(0);
 					switch(command)
 					{
-						case "/join" :
-							if(this.getSession().isChannelToken(cli.get(1))) { 
-								this.getSession().join(cli.get(1));
+						case "/amsg":
+							{
+								String msg = this.mCli.getText().split(" ", 2)[1];
+								for (Channel channel : this.getSession().getChannels()) {
+									channel.say(msg);
+								}
+							}
+							break;
+						case "/away": // TODO: Check whether this works fully as expected
+							{
+								List<String> msg = Arrays.asList(this.mCli.getText().split(" ", 2));
+								if (msg.size() > 1) {
+									this.getSession().setAway(msg.get(1));
+								}
+								
+								else {
+									if (this.getSession().isAway()) {
+										this.getSession().unsetAway();
+									}
+									
+									else {
+										this.getSession().setAway("");
+									}
+								}
+							}
+							break;
+						case "/clear":
+							{
+								this.mChat.setText("");
+							}
+							break;
+						case "/clearall":
+							{
+								for (Window window : Launcher.getManager().getAllWindows()) {
+									window.clear();
+								}
+							}
+							break;
+						case "/closemsg":
+							{
+								if (cli.size() > 1) {
+									QueryWindow window = Launcher.getManager().findQueryWindow(this.getSession(), cli.get(1));
+									if (window != null && !window.isClosed()) {
+										window.onClose();
+									}
+								}
+							}
+							break;
+						case "/exit": // TODO: Is this too quick? Should we bother to cleanly exit stuff?
+							{
+								System.exit(0);
+							}
+						case "/ignore": // TODO: Holy fuck, I hope this isn't clientside
+							{
+								if (cli.size() > 1) {
+									//this.getSession().
+								}
+							}
+						case "/join":
+							if(this.getSession().isChannelToken(cli.get(1))) {
+								if (cli.size() > 2) { // Join with password
+									this.getSession().join(cli.get(1), cli.get(2));
+								}
+								
+								else {
+									this.getSession().join(cli.get(1));
+								}
 							}
 							
 							else {
-								this.appendToChat("Channel names must start with one of " + 
-									Arrays.asList(this.getSession().getServerInformation().getChannelPrefixes()).toString()
-								);
+								output.addError("Channel names must start with one of " + 
+										Arrays.asList(this.getSession().getServerInformation().getChannelPrefixes()).toString());
 							}
 							break;
+						case "/invite":
+							{
+								this.getSession().invite(cli.get(1), this.getSession().getChannel(cli.get(2)));
+								output.addSystemMessage("Invited ");
+								output.addNickname(cli.get(1));
+								output.addSystemMessage(" to join " + this.getSession().getChannel(cli.get(2)).getName());
+							}
+							break;
+						case "/log": // TODO: Write logs to file
+							{
+								if (cli.size() > 1) {
+									
+								}
+								
+								else { // User just want to know the status of logging for current window
+									// Find global setting
+									Boolean globalLogging = Launcher.getPreferences().getBoolean("logGlobal", false); // TODO: Add local logging
+									this.appendToChat(new ChatText()
+										.addSystemMessage("Logging is " + (globalLogging ? "on" : "off"))
+									);
+								}
+							}
+							break;
+						case "/mode": // Verify what this one does
+							{
+								this.getSession().mode(cli.get(1), cli.get(2));
+							}
 						case "/msg":
 							{
 								// Find window if it exists
@@ -134,7 +256,7 @@ abstract class Window extends JInternalFrame {
 								}
 								
 								// Add the text
-								window.appendToChat(this.getSession().getNick() + ": " + cli.get(2));
+								//window.appendToChat(this.getSession().getNick() + ": " + cli.get(2)); // TODO
 								
 								// Send the text to server
 								String msg = this.mCli.getText().split(" ", 3)[2];
@@ -146,13 +268,15 @@ abstract class Window extends JInternalFrame {
 								this.getSession().changeNick(cli.get(1));
 							}
 							break;
-						case "/help":
-							this.appendToChat("The available commands are:\r\n"
-									+ "/help\t\t-\tDisplays a list of avalible commands.\r\n"
-									+ "/msg [USER][MESSAGE]\t-\tSends a private message to a user.\r\n"
-									+ "/join [#CHANNEL]\t-\tJoins a channel, must start with #.");
+						case "/notice":
+							{
+								String msg = this.mCli.getText().split(" ", 3)[2];
+								this.getSession().notice(cli.get(1), msg);
+							}
+						case "/help": // To return later
+							
 							break;
-						default : this.appendToChat("Error this command does not exist. For a list of commands type /help");
+						default : output.addError("Error this command does not exist. For a list of commands type /help");
 					}
 				}
 			}
@@ -161,8 +285,9 @@ abstract class Window extends JInternalFrame {
 		}
 		
 		else {
-			this.appendToChat("Can't chat here!");
+			output.addError("Can't chat here!");
 		}
+		this.appendToChat(output);
 		this.mCli.setText("");
 	}
 	
@@ -185,33 +310,23 @@ abstract class Window extends JInternalFrame {
 		return this.mCli;
 	}
 	
-	public void appendToChat(String line) {
-		try {
-			// Figure out if we should rescroll
-			JScrollBar chatScroller = this.mChatScroller.getVerticalScrollBar();
-			boolean rescroll = chatScroller.getValue() + chatScroller.getVisibleAmount() >= chatScroller.getMaximum();
-			
-			// Should sanitize line, and make sure its placed on a new line, before inserting it
-			this.mChatLines += line + "\n";
-			
-	        SimpleAttributeSet attrs = new SimpleAttributeSet();
-	        StyleConstants.setAlignment(attrs, StyleConstants.ALIGN_LEFT);
-			
-			StyledDocument doc = (StyledDocument) this.mChat.getDocument();
-			doc.insertString(doc.getLength(), "\n" + line, attrs);
-			
-			// Adjust scrollbar if applicable
-			if (rescroll) {
-				SwingUtilities.invokeLater(new Runnable() {
-					public void run() {
-						Window.this.mChatScroller.getVerticalScrollBar().setValue(Window.this.mChatScroller.getVerticalScrollBar().getMaximum());
-					}
-				});
-			}
-		} 
+	public void appendToChat(ChatText pText) {
+		// Don't bother if text is empty (it'll create random, pointless newlines all over)
+		if (pText.isEmpty()) { return; }
 		
-		catch (Exception e) {
-			e.printStackTrace();
+		// Figure out if we should rescroll
+		JScrollBar chatScroller = this.mChatScroller.getVerticalScrollBar();
+		boolean rescroll = chatScroller.getValue() + chatScroller.getVisibleAmount() >= chatScroller.getMaximum();
+		
+		pText.output((StyledDocument) this.mChat.getDocument());
+		
+		// Adjust scrollbar if applicable
+		if (rescroll) {
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					Window.this.mChatScroller.getVerticalScrollBar().setValue(Window.this.mChatScroller.getVerticalScrollBar().getMaximum());
+				}
+			});
 		}
 	}
 	
@@ -227,6 +342,10 @@ abstract class Window extends JInternalFrame {
 	
 	public Session getSession() {
 		return this.mSession;
+	}
+	
+	public void clear() {
+		this.mChat.setText("");
 	}
 }
 
@@ -249,21 +368,17 @@ class ChatWindowEditorKit extends StyledEditorKit {
             String kind = elem.getName();
             if (kind != null) {
                 if (kind.equals(AbstractDocument.ContentElementName)) {
-
                     return new LabelView(elem);
                 } else if (kind.equals(AbstractDocument.ParagraphElementName)) {
                     return new ParagraphView(elem);
                 } else if (kind.equals(AbstractDocument.SectionElementName)) {
-
                     return new ChatWindowBoxView(elem, View.Y_AXIS);
                 } else if (kind.equals(StyleConstants.ComponentElementName)) {
                     return new ComponentView(elem);
                 } else if (kind.equals(StyleConstants.IconElementName)) {
-
                     return new IconView(elem);
                 }
             }
- 
             return new LabelView(elem);
         }
 
