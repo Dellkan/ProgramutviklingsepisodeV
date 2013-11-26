@@ -24,7 +24,6 @@ public class ChannelWindow extends Window {
 			switch (cli.get(0)) {
 				case "/me":
 					// Do "/me" stuff
-					this.appendToChat("JEHANS R RETARD");
 				default:
 					// Not a known command for ChannelWindow.. Send up in hierarchy for processing.
 					super.commandParser();
@@ -33,7 +32,12 @@ public class ChannelWindow extends Window {
 		
 		else {
 			this.mChannel.say(this.mCli.getText());
-			this.appendToChat(this.mChannel.getSession().getNick() + " : " + this.mCli.getText());
+			
+			// Create local copy
+			ChatText output = new ChatText();
+			output.addNickname(this.mChannel.getSession().getNick());
+			output.addText(" : " + this.mCli.getText());
+			this.appendToChat(output); // TODO: Check that message is sent
 		}
 		this.mCli.setText("");
 	}
