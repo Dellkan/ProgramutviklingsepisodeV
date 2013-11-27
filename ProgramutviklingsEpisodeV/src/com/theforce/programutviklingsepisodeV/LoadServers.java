@@ -11,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Vector;
+import java.util.prefs.Preferences;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -28,23 +29,22 @@ import jerklib.Session;
  * @author John
  * @author Martin
  *
- * Will load all servers and add to interface
+ * Will show the connectionWindow frame once
+ * the "Connect to server" from the main window is pressed.
  */
-
 @SuppressWarnings("serial")
 public class LoadServers extends JFrame {
-	Vector<Server> serverList = new Vector<Server>();
-	Vector<String> networkList = new Vector<String>();
-	JTextField realName,userName,alternativeUserName;
-	JLabel jt;
-	JComboBox serverBox = new JComboBox();
-	JComboBox networkBox;
-	GridBagConstraints gbc = new GridBagConstraints();
-	final static String FILE_NAME = "profile.data";
+	private Preferences mPreferences;
+	private Vector<Server> mServerList = new Vector<Server>();
+	private Vector<String> mNetworkList = new Vector<String>();
+	private JTextField mRealName,mUserName,mAlternativeName;
+	private JComboBox mServerBox = new JComboBox();
+	private JComboBox mNetworkBox = new JComboBox();
 
 	LoadServers() {
 		super("Select server");
-		this.setMinimumSize(new Dimension(600,300));
+		this.pack();
+		this.setMinimumSize(new Dimension(400,220));
 		this.setLayout(new GridBagLayout());	
 		setVisible(true);
 
@@ -59,98 +59,46 @@ public class LoadServers extends JFrame {
 				if(sCurrentLine.length() > 1) 
 				{
 					String network = sCurrentLine.substring(sCurrentLine.indexOf("GROUP")+6, sCurrentLine.length());
-					if(!networkList.contains(network)) {		
-						networkList.add(network);
+					if(!mNetworkList.contains(network)) {		
+						mNetworkList.add(network);
 					}
-					serverList.add(new Server(sCurrentLine));
+					mServerList.add(new Server(sCurrentLine));
 				}
 			}
 		 } 
 		
 		catch (IOException e) {
 			e.printStackTrace();
-		} 
-		
-		finally {
-			try {
-				if (br != null) {
-					br.close();
-				}
 			} 
-			
-			catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
 
 		showNetworks();
-		showServers(networkList.firstElement());
+		showServers(mNetworkList.firstElement());
 		createAndShowGUI();
-		loadProfileData();
+		getPreferences();
 		this.pack();
 	}
 
 
 	/**
-	 * Loads data about a earlier stored used profile.
+	 * Loads data about a earlier stored used profile from stored preferences
 	 */
-	public void loadProfileData() {		 
-		try{
-			File file = new File(FILE_NAME);
-			if (file.exists()) {
-				FileReader filereader = new FileReader(file);
-				BufferedReader bufferedReader = new BufferedReader(filereader);
-				String profile = bufferedReader.readLine(); 
-				
-				int start = 0;
-				int end = profile.indexOf(",");
-				
-				realName.setText(profile.substring(start, end));
-				start = end;
-				end = profile.indexOf(",", start+1);
-				userName.setText(profile.substring(start+1, end));
-				start = end;
-				end = profile.length();
-				alternativeUserName.setText(profile.substring(start+1,end));
-				bufferedReader.close();
-			}
-		} 
-		
-		catch(Exception e) {} 
+	public void getPreferences() {	
+	    this.mPreferences = Preferences.userRoot().node(this.getClass().getName());
+	    
+	    this.mUserName.setText(mPreferences.get("userName","userName"));
+	    this.mRealName.setText(mPreferences.get("realName", "realName")); 
+	    this.mAlternativeName.setText(mPreferences.get("alternate", "alternate"));
 	}
 	
 	/**
-	 * Stores profile data in a .data file
+	 * Stores preferenced usernames typed in the connection window
 	 * @param profile the profile to be saved in the file.
 	 */
-	public void storeProfileData(Profile profile) {
-		FileOutputStream fop = null;
-		File file;
-		String content = profile.getName() + "," + profile.getFirstNick() + 
-						 "," + profile.getSecondNick(); 
-		try {
- 
-			file = new File(FILE_NAME);
-			fop = new FileOutputStream(file);
-			file.createNewFile();
-			
-			byte[] contentInBytes = content.getBytes("UTF-8");
- 
-			fop.write(contentInBytes);
-			fop.flush();
-			fop.close();
-  
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				if (fop != null) {
-					fop.close();
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+	public void setPreferences(Profile profile) {
+		this.mPreferences = Preferences.userRoot().node(this.getClass().getName());
+		this.mPreferences.put("realName", profile.getName());
+		this.mPreferences.put("userName", profile.getFirstNick());
+		this.mPreferences.put("alternate", profile.getSecondNick());
 	}
 
 	/**
@@ -158,112 +106,96 @@ public class LoadServers extends JFrame {
 	 * @param network which network the servers are from.
 	 */
 	public void showServers(String network) {
-		serverBox.removeAllItems();
-		for(int i = 0; i < serverList.size();i++) {
-			String serverNetwork = serverList.get(i).getNetwork();
+		this.mServerBox.removeAllItems();
+		
+		for(int i = 0; i < mServerList.size();i++) {
+			String serverNetwork = mServerList.get(i).getNetwork();
 			if(serverNetwork.contentEquals(network)) {
-				serverBox.addItem(serverList.get(i));
+				this.mServerBox.addItem(mServerList.get(i));
 			}
 		}
-		pack();
 	}
 	
 	/**
-	 * Will show all networks found in a dropdown list.
+	 * Shows all the networks currently in the list of found networks.
+	 * <br>Will show the in a dropdown menu.
 	 */
 	public void showNetworks() {
-		Vector<String> listModel = new Vector<String>();
-		for(int i = 0; i < networkList.size();i++)
-		{
-			listModel.addElement(networkList.elementAt(i));
+		for(int i = 0; i < mNetworkList.size();i++) {
+			this.mNetworkBox.addItem(mNetworkList.elementAt(i));
 		}
-		networkBox = new JComboBox(listModel);
-		networkBox.addActionListener(new ActionListener() {
+		
+		mNetworkBox.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				showServers(networkBox.getSelectedItem().toString());
+				showServers(mNetworkBox.getSelectedItem().toString());
 			}		
 		});
-		
 	}
 	
 	/**
-	 * Shows the user GUI.
+	 * Shows the user GUI for the connectionWindow
+	 * with profile information and serverinformation
+	 * <br> once connect to server is pressed.
 	 */
 	public void createAndShowGUI() {
+		GridBagConstraints gbc = new GridBagConstraints();
+		JLabel dText;
 		gbc.fill = gbc.HORIZONTAL;
-		
-		gbc.gridx = 0;
-		gbc.gridy = 0;
-		jt = new JLabel("Username: ");
-		jt.setPreferredSize(new Dimension(120, 30));
-		jt.setMinimumSize(new Dimension(120,30));
-		this.add(jt,gbc);
-		gbc.gridx = 1;
-		gbc.gridy = 0;
-		userName = new JTextField();
-		userName.setMinimumSize(new Dimension(120,30));
-		userName.setPreferredSize(new Dimension(120, 30));
-		userName.setMaximumSize(new Dimension(120,30));
-		this.add(userName,gbc);
-		
-		gbc.gridx = 0;
-		gbc.gridy = 1;
-		jt = new JLabel("Alternative Username: ");
-		jt.setPreferredSize(new Dimension(140, 30));
-		jt.setMinimumSize(new Dimension(120,30));
-		this.add(jt,gbc);		
-		gbc.gridx = 1;
-		gbc.gridy = 1;
-		alternativeUserName = new JTextField();
-		alternativeUserName.setMinimumSize(new Dimension(120,30));
-		alternativeUserName.setMaximumSize(new Dimension(120,30));
-		alternativeUserName.setPreferredSize(new Dimension(120, 30));
-		this.add(alternativeUserName,gbc);
-		
-		gbc.gridx = 0;
-		gbc.gridy = 2;
-		jt = new JLabel("Real name: ");
-		jt.setPreferredSize(new Dimension(120, 30));
-		jt.setMinimumSize(new Dimension(120,30));
-		this.add(jt,gbc);
-		gbc.gridx = 1;
-		gbc.gridy = 2;
-		realName = new JTextField();
-		realName.setMinimumSize(new Dimension(120,30));
-		realName.setMaximumSize(new Dimension(120,30));
-		realName.setPreferredSize(new Dimension(120, 30));
-		this.add(realName,gbc);
 
-		gbc.gridx = 2;
+		gbc.gridx = 0;
 		gbc.gridy = 0;
-		jt = new JLabel("Network: ");
-		jt.setPreferredSize(new Dimension(120, 20));
-		jt.setMinimumSize(new Dimension(120,20));
-		this.add(jt,gbc);
-		gbc.gridx = 3;
+		dText = new JLabel("Username: ");
+		this.add(dText,gbc);
+		gbc.gridx = 1;
 		gbc.gridy = 0;
-		networkBox.setPreferredSize(new Dimension(200,30));
-		networkBox.setMaximumSize(new Dimension(200,30));
-		this.add(networkBox,gbc);
+		this.mUserName = new JTextField();
+		this.mUserName.setMinimumSize(new Dimension(300,300));
+		this.mUserName.setMaximumSize(new Dimension(300,300));
+		this.add(mUserName,gbc);
 		
-		gbc.gridx = 2;
+		gbc.gridx = 0;
 		gbc.gridy = 1;
-		jt = new JLabel("Server: ");
-		jt.setMinimumSize(new Dimension(350,30));
-		this.add(jt,gbc);	
-		gbc.gridx = 3;
+		dText = new JLabel("Alternative Username: ");
+		this.add(dText,gbc);		
+		gbc.gridx = 1;
 		gbc.gridy = 1;
-		serverBox.setMinimumSize(new Dimension(350,30));
-		serverBox.setPreferredSize(new Dimension(350,30));
-		serverBox.setMaximumSize(new Dimension(350,30));
-		this.add(serverBox,gbc);
+		this.mAlternativeName = new JTextField();
+		this.mAlternativeName.setMinimumSize(new Dimension(300,30));
+		this.mAlternativeName.setMaximumSize(new Dimension(300,30));
+		this.add(this.mAlternativeName,gbc);
 		
+		gbc.gridx = 0;
+		gbc.gridy = 2;
+		dText = new JLabel("Real name: ");
+		this.add(dText,gbc);
+		gbc.gridx = 1;
+		gbc.gridy = 2;
+		this.mRealName = new JTextField();
+		this.mRealName.setMinimumSize(new Dimension(200,30));
+		this.mRealName.setMaximumSize(new Dimension(200,30));
+		this.add(this.mRealName,gbc);
+
+		gbc.gridx = 1;
+		gbc.gridy = 3;
+		this.mNetworkBox.setMinimumSize(new Dimension(350,30));
+		this.mNetworkBox.setPreferredSize(new Dimension(350,30));
+		this.mNetworkBox.setMaximumSize(new Dimension(350,30));
+		this.add(this.mNetworkBox,gbc);
+		
+		gbc.gridx = 1;
+		gbc.gridy = 4;
+		this.mServerBox.setMinimumSize(new Dimension(350,30));
+		this.mServerBox.setMaximumSize(new Dimension(350,30));
+		this.add(this.mServerBox,gbc);
+		
+		gbc.fill = gbc.NONE;
 		JButton connectServer = new JButton("Connect");
+		connectServer.setMaximumSize(new Dimension(50,30));
 		connectServer.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				if(userName.getText().length() >= 1) {
+				if(mUserName.getText().length() >= 1) {
 					Profile profile = getUserProfile();
 					ConnectionManager conManager = new ConnectionManager(profile);
 					
@@ -273,39 +205,44 @@ public class LoadServers extends JFrame {
 					Session session = conManager.requestConnection(server.getDns(), port);
 					Launcher.getManager().createServerWindow(session);
 					
-					storeProfileData(profile);
+					setPreferences(profile);
+					setVisible(false);
+					dispose();
 				}
 			}
 		});
-		gbc.gridx = 2;
+		gbc.gridx = 1;
 		gbc.gridy = 5;
 		this.add(connectServer,gbc);
 	}
-	
+
 	/**
-	 *  Will get the chosen server.
-	 * @return Gets chosen server from serverlist
+	 *  Will get the server that is chosen from the dropdown menu
+	 *  <br> shown in the connection window
+	 * @return Gets chosen server from mServerList
 	 */
 	public Server getChosenServer() {
-		return (Server) serverBox.getSelectedItem();
+		return (Server) this.mServerBox.getSelectedItem();
 	}
 	
 	/**
-	 * Will get the profile names and such from the menu.
-	 * Will also autogenerate alternate nicknames and realName
+	 * Will get the profile information that the user typed into 
+	 * <br> the connection window and return it as a profile object.
+	 * Will also autogenerate alternate nicknames and real name if not supplied
+	 * <br> or if they are alike.
 	 * @return Profile object
 	 */
 	public Profile getUserProfile() {
-		String nick = this.userName.getText();
-		String real = this.realName.getText();
-		String alternate = this.alternativeUserName.getText();
+		String nick = this.mUserName.getText();
+		String real = this.mRealName.getText();
+		String alternate = this.mAlternativeName.getText();
 		
 		if(alternate.length() < 1 || nick.contentEquals(alternate))	{
 			alternate = nick + "1";
 		}
 		
 		if(real.length() < 1) {
-			real = "realNameGenerated321";
+			real = "mRealNameGenerated321";
 		}
 		return new Profile(real,nick, alternate, (alternate+"2"));
 	}

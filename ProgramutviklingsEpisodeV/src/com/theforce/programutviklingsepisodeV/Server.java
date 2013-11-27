@@ -1,35 +1,37 @@
 package com.theforce.programutviklingsepisodeV;
-/**
- * @author Jehans Storvik
- * @author John Høegh Omdal
- * @author Martin Bragen
- */
+
 import java.io.Serializable;
 
 import java.util.Vector;
 
 /**
- * A server helperclass which will read one server from a file.
+ * @author Jehans Storvik
+ * @author John Høegh Omdal
+ * @author Martin Bragen
+ * 
+ * Receives a string which contains a single server.
+ * A server helperclass.
  */
-public class Server implements Serializable {
+public class Server  {
 	private static final long serialVersionUID = 1L;
-	private String networkNumber;
-	private String location;
-	private String dns;
-	private Vector<Integer>allowedPorts = new Vector<Integer>();
-	private String network;	
+	private String mNetworkNumber;
+	private String mLocation;
+	private String mDns;
+	private Vector<Integer>mAllowedPorts = new Vector<Integer>();
+	private String mNetwork;	
 	
 	
 	Server(String srvInfo)	{
 		int currentIndex = 0;
-		networkNumber = srvInfo.substring(0,currentIndex = srvInfo.indexOf("="));
-		location = srvInfo.substring(currentIndex+1, srvInfo.indexOf("SERVER"));
+		
+		this.mNetworkNumber = srvInfo.substring(0,currentIndex = srvInfo.indexOf("="));
+		this.mLocation = srvInfo.substring(currentIndex+1, srvInfo.indexOf("SERVER"));
 		currentIndex = srvInfo.indexOf(":");
-		dns = srvInfo.substring(currentIndex+1, currentIndex = srvInfo.indexOf(":", currentIndex+1));
+		this.mDns = srvInfo.substring(currentIndex+1, currentIndex = srvInfo.indexOf(":", currentIndex+1));
 
 		String portInfo = srvInfo.substring(currentIndex+1, srvInfo.indexOf("ROUP", currentIndex+1));
 		
-		if(portInfo.contains("+"))	//We do not care much about SSL crypt
+		if(portInfo.contains("+"))
 		{
 			portInfo = portInfo.replace("+", "");
 		}
@@ -39,7 +41,7 @@ public class Server implements Serializable {
 			if(portInfo.charAt(portIndex) == 'G')	
 			{
 				int port = Integer.parseInt(portInfo.substring(portIndex-4, portIndex));
-				allowedPorts.add(port);
+				this.mAllowedPorts.add(port);
 			}
 			else if(portInfo.charAt(portIndex) == '-')
 			{
@@ -47,7 +49,7 @@ public class Server implements Serializable {
 				int endPort = Integer.parseInt(portInfo.substring(portIndex+1, portIndex+5));
 				while(startPort <= endPort)
 				{
-					allowedPorts.add(startPort);
+					this.mAllowedPorts.add(startPort);
 					startPort++;
 				}
 				portIndex+=5;
@@ -55,53 +57,45 @@ public class Server implements Serializable {
 			else if(portInfo.charAt(portIndex) == ',')
 			{
 				int port = Integer.parseInt(portInfo.substring(portIndex-4, portIndex));
-				allowedPorts.add(port);
+				this.mAllowedPorts.add(port);
 			}
 			portIndex+=5;
 		}while(portIndex <= portInfo.length());	
-		network = srvInfo.substring(srvInfo.lastIndexOf(":")+1, srvInfo.length());
+		this.mNetwork = srvInfo.substring(srvInfo.lastIndexOf(":")+1, srvInfo.length());
 	}
 
+	 /**
+	  * Gets information about a server
+	  * 
+	  * @return Describes the server with location, network and dns
+	  * 
+	  */
 	public String toString() {
-		return location + " " + network + " (" + dns + ")";
-	}
-	public String getNetworkNumber() {
-		return networkNumber;
+		return this.mLocation + " " + this.mNetwork + " (" + this.mDns + ")";
 	}
 
-	public void setNetworkNumber(String networkNumber) {
-		this.networkNumber = networkNumber;
-	}
 
-	public String getLocation() {
-		return location;
-	}
-
-	public void setLocation(String location) {
-		this.location = location;
-	}
-
+	/**
+	 * @return dns
+	 */
 	public String getDns() {
-		return dns;
+		return this.mDns;
 	}
 
-	public void setDns(String dns) {
-		this.dns = dns;
-	}
 
+	/**
+	 * 
+	 * @return a list over the set ports for a server
+	 */
 	public Vector<Integer> getAllowedPorts() {
-		return allowedPorts;
+		return this.mAllowedPorts;
 	}
 
-	public void setAllowedPorts(Vector<Integer> allowedPorts) {
-		this.allowedPorts = allowedPorts;
-	}
-
+	/**
+	 * 
+	 * @return returns which network a server belongs to
+	 */
 	public String getNetwork() {
-		return network;
-	}
-
-	public void setNetwork(String network) {
-		this.network = network;
+		return this.mNetwork;
 	}
 }
