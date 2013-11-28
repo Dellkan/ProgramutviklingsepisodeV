@@ -22,6 +22,13 @@ import java.util.List;
 
 import jerklib.Session;
 
+/**
+ * 
+ * @author Hans Martin Bragen
+ * @author Jehans Jr. Storvik
+ * @author John Høegh-Omdal
+ *
+ */
 @SuppressWarnings({"serial", "rawtypes"})
 abstract class Window extends JInternalFrame {
 	private JScrollPane mChatScroller;
@@ -37,6 +44,12 @@ abstract class Window extends JInternalFrame {
 	protected Component mToolbarRef;
 	private Session mSession;
 	
+	/**
+	 * 
+	 * @param session session to associate with the window
+	 * @param title string containing the title to give the window
+	 * @param showUsersInterface bool, if true shows user interface; else hides it
+	 */
 	public Window(Session session, String title, boolean showUsersInterface) {
 		super(title, true, true, true, true);
 		this.mSession = session;
@@ -329,7 +342,9 @@ abstract class Window extends JInternalFrame {
             e.printStackTrace();
         }
 	}
-	
+	/**
+	 * function to handle chat commands.
+	 */
 	protected void commandParser() {
 		if (!this.getCommandLine().isEmpty()) {
 			if (this.getCommandLine().charAt(0) == '/') {
@@ -349,31 +364,56 @@ abstract class Window extends JInternalFrame {
 			this.setCommandLine("");
 		}
 	}
-	
+	/**
+	 * removes itself from window manager when closed
+	 */
 	protected void onClose() {
 		// Remove from window manager
 		Launcher.getManager().RemoveWindow(this);
 	};
 	
+	/**
+	 * Sets references to toolbar component
+	 * @param ref The component object to references
+	 */
 	public void setToolbarReference(Component ref) {
 		this.mToolbarRef = ref;
 	}
-	
+	/**
+	 * Gets the toolbar reference in the window
+	 * @return a reference to the windows toolbar
+	 */
 	public Component getToolbarReference() {
 		return this.mToolbarRef;
 	}
 	
+	/**
+	 * gets the index of the windows toolbar
+	 * @return the index of the windows toolbar
+	 */
 	public int getToolbarIndex() {
 		return Launcher.getManager().getWindowToolbar().indexOfComponent(this.mToolbarRef);
 	}
 	
+	/**
+	 * fetches the CLI of the window
+	 * @return the windows CLI
+	 */
 	public JTextField getCLI() {
 		return this.mCli;
 	}
 	
+	/**
+	 * 
+	 * @return
+	 */
 	public JComboBox<String> getCLIAuto() {
 		return this.mCliAuto;
 	}
+	/**
+	 * Adds text to the string.
+	 * @param pText string with text to append to chat
+	 */
 	
 	public void appendToChat(ChatText pText) {
 		// Don't bother if text is empty (it'll create random, pointless newlines all over)
@@ -383,6 +423,10 @@ abstract class Window extends JInternalFrame {
 		pText.output((StyledDocument) this.mChat.getDocument());
 	}
 	
+	/**
+	 * Fetches the text in the chat text input box.
+	 * @return a string with the input text.
+	 */
 	public String getCommandLine() {
 		return this.getCLI().getText();
 	}
@@ -390,7 +434,10 @@ abstract class Window extends JInternalFrame {
 	public void setCommandLine(String pText) {
 		this.getCLI().setText(pText);
 	}
-	
+	/**
+	 * Sets the title of the window to the string parameter
+	 * @param title String containing the title to set
+	 */
 	@Override
 	public void setTitle(String title) {
 		if (!this.isClosed()) {
@@ -402,26 +449,45 @@ abstract class Window extends JInternalFrame {
 		}
 	}
 	
+	/**
+	 * Gets the session the window is associated with.
+	 * @return the session object the window is associated with.
+	 */
 	public Session getSession() {
 		return this.mSession;
 	}
 	
+	/**
+	 * clears the window for text
+	 */
 	public void clear() {
 		this.mChat.setText("");
 	}
-	
+	/**
+	 * Sends a chat message if you're in a window you can chat.
+	 * @param pText String containing the text to add to chat.
+	 */
 	public void say(String pText) {
 		this.appendToChat(new ChatText().addError("You can't chat here!"));
 	}
-	
+	/**
+	 * Fetches earlier input from the Cli
+	 * @return a list containing strings with earlier user input.
+	 */
 	public List<String> getCliHistory() {
 		return this.mCliHistory;
 	}
-	
+	/**
+	 * Gets the CliSend
+	 * @return JButton
+	 */
 	public JButton getCliSend() {
 		return this.mCliSend;
 	}
-	
+	/**
+	 * Gets the timestamp
+	 * @return long timestamp
+	 */
 	public long getTimestamp() {
 		return this.mTimestamp;
 	}
@@ -429,9 +495,11 @@ abstract class Window extends JInternalFrame {
 
 @SuppressWarnings("serial")
 /**
- * Part of the hack necessary to make chat lines appear at bottom
+ * Part of the what's necessary to make chat lines appear at bottom
  * 
- * @author John
+ * @author Hans Martin Bragen
+ * @author Jehans Jr. Storvik
+ * @author John Høegh-Omdal
  *
  */
 class ChatWindowEditorKit extends StyledEditorKit {
@@ -464,9 +532,11 @@ class ChatWindowEditorKit extends StyledEditorKit {
 }
  
 /**
- * This class is part of the hack necessary to make chat lines appear at bottom
+ * This class is part of what's necessary to make chat lines appear at bottom
  * 
- * @author John
+ * @author Hans Martin Bragen
+ * @author Jehans Jr. Storvik
+ * @author John Høegh-Omdal
  *
  */
 class ChatWindowBoxView extends BoxView {
