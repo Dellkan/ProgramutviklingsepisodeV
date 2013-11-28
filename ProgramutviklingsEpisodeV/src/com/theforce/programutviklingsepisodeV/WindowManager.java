@@ -24,6 +24,15 @@ import javax.swing.event.ChangeListener;
 import jerklib.Channel;
 import jerklib.Session;
 
+/**
+ * 
+ * @author Hans Martin Bragen
+ * @author Jehans Jr. Storvik
+ * @author John Høegh-Omdal
+ *
+ * This class is used to manage and contain all server, channel and PM windows 
+ *
+ */
 @SuppressWarnings("serial")
 public class WindowManager extends JFrame {
 	private JDesktopPane mFrame;
@@ -31,6 +40,10 @@ public class WindowManager extends JFrame {
 	private JTabbedPane mTabs;
 	private ArrayList<Window> mWindows = new ArrayList<Window>();
 	private DebugWindow mDebugWindow;
+	
+	/**
+	 * Constructor used to create the initial window
+	 */
 	public WindowManager() {
 		super();
 		// Create frame
@@ -60,7 +73,7 @@ public class WindowManager extends JFrame {
 			}
 		});
 		
-		// Add component listener to we can detect resizing
+		// Add component listener so we can detect resizing
 		this.addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized(ComponentEvent pEvent) {
@@ -130,6 +143,11 @@ public class WindowManager extends JFrame {
 		}
 		return windows;
 	}
+	/**
+	 * 
+	 * @param window The target window object
+	 * @param tabIconPath path to image to be used as icon
+	 */
 	
 	private void setupWindow(Window window, String tabIconPath) {
 		// Add window to manager
@@ -165,6 +183,9 @@ public class WindowManager extends JFrame {
 		window.setFrameIcon(icon);
 		this.mTabs.setTabComponentAt(window.getToolbarIndex(), new WindowTabButtonComponent(this.mTabs, icon));
 	}
+	/**
+	 * Generates a debug window if one does not already exist
+	 */
 	
 	public void createDebugWindow() {
 		if (this.mDebugWindow == null || this.mDebugWindow.isClosed()) {
@@ -172,6 +193,10 @@ public class WindowManager extends JFrame {
 			this.setupWindow(this.mDebugWindow, "cog.png");
 		}
 	}
+	/**
+	 * 
+	 * @return if a debugWindow exists it's returned else returns null
+	 */
 	
 	public DebugWindow getDebugWindow() {
 		if (this.mDebugWindow == null || this.mDebugWindow.isClosed()) {
@@ -179,7 +204,11 @@ public class WindowManager extends JFrame {
 		}
 		return this.mDebugWindow;
 	}
-	
+	/**
+	 * Generates a server window and associates it with an irc session
+	 * @param pSession to associate with the server window
+	 * @return returns a server window object
+	 */
 	public ServerWindow createServerWindow(Session pSession) {
 		ServerWindow window = new ServerWindow(pSession);
 		this.setupWindow(window, "server.png");
@@ -187,7 +216,11 @@ public class WindowManager extends JFrame {
 		// return the window
 		return window;
 	}
-	
+	/**
+	 * Generates a channel window and associates it with an irc session.channel
+	 * @param pChannel the channel to associate the window with
+	 * @return returns a channel window object
+	 */
 	public ChannelWindow createChannelWindow(Channel pChannel) {
 		ChannelWindow window = new ChannelWindow(pChannel);
 		this.setupWindow(window, "channel.png");
@@ -196,6 +229,12 @@ public class WindowManager extends JFrame {
 		return window;
 	}
 	
+	/**
+	 * Generates a PM window
+	 * @param pSession Session in which the MSG is
+	 * @param pNickname Nick of the person the conversation is with
+	 * @return returns a query window object
+	 */
 	public QueryWindow createQueryWindow(Session pSession, String pNickname) {
 		QueryWindow window = new QueryWindow(pSession, pNickname);
 		this.setupWindow(window, "query.png");
@@ -204,6 +243,12 @@ public class WindowManager extends JFrame {
 		return window;
 	}
 	
+	/**
+	 * Locates an open query window if it exists
+	 * @param pSession Session which the conversation is
+	 * @param pNick nick of the person the conversation is with
+	 * @return returns the query window if found else returns null
+	 */
 	public QueryWindow findQueryWindow(Session pSession, String pNick) {
 		for (Window window : this.mWindows) {
 			if (window instanceof QueryWindow) {
@@ -215,7 +260,11 @@ public class WindowManager extends JFrame {
 		}
 		return null;
 	}
-	
+	/**
+	 * Locates an open channel window if it exists
+	 * @param pChannel channel you're looking for
+	 * @return returns the channel window if found else returns null
+	 */
 	public ChannelWindow findChannelWindow(Channel pChannel) {
 		for (Window window : this.mWindows) {
 			if (window instanceof ChannelWindow && ((ChannelWindow)window).getChannel().equals(pChannel)) {
@@ -225,6 +274,11 @@ public class WindowManager extends JFrame {
 		return null;
 	}
 	
+	/**
+	 * locates all open channel windows in a session
+	 * @param pSession in which to locate open channels
+	 * @return returns a list with all open channel windows in a session
+	 */
 	public List<ChannelWindow> findChannelWindows(Session pSession) {
 		List<ChannelWindow> windows = new ArrayList<ChannelWindow>();
 		for (Window window : this.mWindows) {
@@ -235,6 +289,11 @@ public class WindowManager extends JFrame {
 		return windows;
 	}
 	
+	/**
+	 * Finds the server window associated with a session
+	 * @param pSession the session to locate the server window
+	 * @return if found returns the server window else returns null
+	 */
 	public ServerWindow findServerWindow(Session pSession) {
 		for (Window window : this.mWindows) {
 			if (window instanceof ServerWindow && ((ServerWindow)window).getSession().equals(pSession)) {
@@ -244,6 +303,10 @@ public class WindowManager extends JFrame {
 		return null;
 	}
 	
+	/**
+	 * Kills a window and disposes of it's body
+	 * @param pWindow window to kill
+	 */
 	public void RemoveWindow(Window pWindow) {
 		this.mWindows.remove(pWindow);
 		if (!pWindow.isClosed()) { pWindow.dispose(); }
