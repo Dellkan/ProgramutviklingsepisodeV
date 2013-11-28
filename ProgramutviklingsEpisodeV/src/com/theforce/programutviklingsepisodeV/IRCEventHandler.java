@@ -8,6 +8,7 @@ import jerklib.listeners.IRCEventListener;
  * @author John Høeg-Omdal
  * @author Jehans JR Storvik
  *
+ * A class to handle all the various events that happens in the IRC client.
  */
 
 public class IRCEventHandler implements IRCEventListener{

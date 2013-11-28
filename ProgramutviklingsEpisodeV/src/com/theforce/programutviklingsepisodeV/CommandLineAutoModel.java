@@ -16,6 +16,8 @@ import jerklib.Channel;
  * to the Command line
  * 
  * @author John
+ * @author Martin
+ * @author Jehans
  *
  */
 @SuppressWarnings({ "serial" })
@@ -28,6 +30,10 @@ class CommandLineAutoModel extends AbstractListModel<String> implements ComboBox
 		this.mWindow = pWindow;
 	}
 	
+	/**
+	 * Gets element at the chosen index
+	 * @param int index
+	 */
 	@Override
 	public String getElementAt(int index) {
 		if (this.mWindow.getCommandLine().length() > 0) {
@@ -36,6 +42,10 @@ class CommandLineAutoModel extends AbstractListModel<String> implements ComboBox
 		return "";
 	}
 
+	/**
+	 * A function to get the size of the list of commands.
+	 * @return int which is size of of the list
+	 */
 	@Override
 	public int getSize() {
 		if (this.mWindow.getCommandLine().length() > 0) {
@@ -51,11 +61,19 @@ class CommandLineAutoModel extends AbstractListModel<String> implements ComboBox
 		return this.mCollection.size();
 	}
 
+	/**
+	 * Gets selected command
+	 * @return Selected chosen completed command.
+	 */
 	@Override
 	public Object getSelectedItem() {
 		return this.mSelected;
 	}
 
+	/**
+	 * Sets the selected command to the line.
+	 * @param Item to be set.
+	 */
 	@Override
 	public void setSelectedItem(Object anItem) {
 		this.mSelected = (String)anItem;

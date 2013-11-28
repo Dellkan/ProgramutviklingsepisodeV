@@ -1,5 +1,11 @@
 package com.theforce.programutviklingsepisodeV;
 
+/**
+ * @author John
+ * @author Jehans
+ * @author Martin
+ * A window simply to use for debugging.
+ */
 @SuppressWarnings("serial")
 public class DebugWindow extends Window {
 	public DebugWindow() {

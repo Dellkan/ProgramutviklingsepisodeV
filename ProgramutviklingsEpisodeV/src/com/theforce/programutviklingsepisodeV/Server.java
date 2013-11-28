@@ -85,7 +85,7 @@ public class Server  {
 
 	/**
 	 * 
-	 * @return a list over the set ports for a server
+	 * @return Vector<List> a list over the set ports for a server
 	 */
 	public Vector<Integer> getAllowedPorts() {
 		return this.mAllowedPorts;
