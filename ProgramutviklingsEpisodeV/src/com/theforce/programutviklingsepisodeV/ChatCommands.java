@@ -10,6 +10,8 @@ import jerklib.Channel;
 /**
  * Maintains an interface towards chat commands, making it possible to retrieve and add commands.
  * @author John
+ * @author Jehans
+ * @author Martin
  *
  */
 class ChatCommands {
@@ -18,7 +20,7 @@ class ChatCommands {
 	/**
 	 * Attempts to parse a command. If it finds a local match for the command, executes the local
 	 * action. Otherwise sends the command in raw format to the server.
-	 * 
+	 * 	
 	 * @param pCli
 	 * @param pWindow 
 	 */
@@ -76,7 +78,7 @@ class ChatCommands {
 			}
 		}));
 		
-		// /! TODO bugged
+
 		ChatCommands.createCommand(new Command("/!", "Recalls the last message you typed in any window.", 
 				new CommandAction() {
 			@Override
@@ -594,7 +596,8 @@ class ChatCommands {
  * Class template for chat commands. Can be created without an action,
  * if desired to add help and auto complete without local action parsing
  * @author John
- *
+ * @author Jehans
+ * @author Martin
  */
 class Command {
 	private String mCommand;

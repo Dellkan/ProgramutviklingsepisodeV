@@ -6,6 +6,14 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JToolBar;
 
+/**
+ * @author Martin
+ * @author Jehans
+ * @author John
+ * 
+ * Makes the toolbar which is seen on the top in the main window.
+ * <br>Contains the connect button which shows the connect to  server window.
+ */
 @SuppressWarnings("serial")
 public class ActionToolbar extends JToolBar {
 	public ActionToolbar() {
@@ -17,7 +25,6 @@ public class ActionToolbar extends JToolBar {
         button.setToolTipText("Create new window");
         button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
-                // New
             	new LoadServers();
             }
         });
