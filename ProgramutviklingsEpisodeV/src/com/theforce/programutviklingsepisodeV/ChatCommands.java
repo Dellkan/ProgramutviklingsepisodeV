@@ -664,7 +664,9 @@ class Command {
 
 /**
  * Glorified callback pointer for chat commands.
- * @author John
+ * @author Hans Martin Bragen
+ * @author Jehans Jr. Storvik
+ * @author John Høegh-Omdal
  *
  */
 abstract class CommandAction {
