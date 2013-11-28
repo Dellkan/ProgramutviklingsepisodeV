@@ -5,7 +5,13 @@ import java.util.prefs.Preferences;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
-
+/**
+ * @author Martin
+ * @author Jehans
+ * @author John
+ * 
+ * Containts public staic void main and starts the entire program.
+ */
 public class Launcher {
 	public static WindowManager mWindowManager;
 	public static Preferences mPreferences;
@@ -29,10 +35,18 @@ public class Launcher {
 		Launcher.mWindowManager = new WindowManager();
 	}
 	
+	/**
+	 * 
+	 * @return Gets the windowmanager which contains all the windows.
+	 */
 	public static WindowManager getManager() {
 		return Launcher.mWindowManager;
 	}
 	
+	/**
+	 * 
+	 * @return Gets stored window properties preferences.
+	 */
 	public static Preferences getPreferences() {
 		return Launcher.mPreferences;
 	}

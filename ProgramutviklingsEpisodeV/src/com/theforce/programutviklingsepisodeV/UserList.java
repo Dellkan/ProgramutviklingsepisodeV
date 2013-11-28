@@ -9,6 +9,14 @@ import javax.swing.AbstractListModel;
 import jerklib.Channel;
 import jerklib.ModeAdjustment;
 
+/**
+ * @author John
+ * @author jehans
+ * @author Martin
+ * 
+ * Makes a list of of all the users on the right side of the chat window.
+ */
+
 @SuppressWarnings({ "serial", "rawtypes" })
 public class UserList extends AbstractListModel {
 	private Channel mChannel;
@@ -16,6 +24,11 @@ public class UserList extends AbstractListModel {
 		this.mChannel = pChannel;
 	}
 
+	/**
+	 * Gets usernick at the chosen index from the channel userlist.
+	 * @param Gets user at the chosen index in the list.
+	 * @return Will return the usernick at the sent index.
+	 */
 	@Override
 	public Object getElementAt(int index) {
 		String nick = this.mChannel.getNicks().get(index);
@@ -35,12 +48,19 @@ public class UserList extends AbstractListModel {
 		return nick;
 	}
 
+	/**
+	 * Gets current size of the user list.
+	 * @return the amount of users in the channel.
+	 */
 	@Override
 	public int getSize() {
 		List<String> nicks = this.mChannel.getNicks(); 
 		return nicks.size();
 	}
 
+	/**
+	 * Updates the content in the the user list.
+	 */
 	public void update() {
 		this.fireContentsChanged(this, 0, this.getSize());
 	}
