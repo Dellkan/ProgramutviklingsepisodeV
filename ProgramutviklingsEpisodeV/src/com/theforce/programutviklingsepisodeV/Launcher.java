@@ -22,9 +22,11 @@ public class Launcher {
 		    }
 		} catch (Exception e) {	}
 		
+		// Create preferences
+		Launcher.mPreferences = Preferences.userNodeForPackage(Launcher.class);
+		
 		// Create frame
 		Launcher.mWindowManager = new WindowManager();
-		Launcher.mPreferences = Preferences.userNodeForPackage(Launcher.class);
 	}
 	
 	public static WindowManager getManager() {

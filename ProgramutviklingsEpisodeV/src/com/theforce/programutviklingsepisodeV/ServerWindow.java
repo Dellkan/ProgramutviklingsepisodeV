@@ -7,19 +7,13 @@ import jerklib.Session;
 @SuppressWarnings("serial")
 public class ServerWindow extends Window {
 	public ServerWindow(Session pSession) {
-		super(pSession, pSession.getRequestedConnection().getHostName() + " (connecting...)", false);
+		super(pSession, pSession.getRequestedConnection().getHostName() + " (Connecting...)", false);
 		
 		// Attach event handler to session
 		this.getSession().addIRCEventListener(new IRCEventHandler(this));
 		
 		// Give user some feedback
 		this.appendToChat(new ChatText().addSystemMessage("Connecting to " + pSession.getRequestedConnection().getHostName() + "..."));
-	}
-	
-	@Override
-	protected void commandParser() {
-		// Only override for clarity and possible expansion.
-		super.commandParser();
 	}
 	
 	@Override

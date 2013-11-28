@@ -22,9 +22,26 @@ public class IRCEventHandler implements IRCEventListener{
 	 */
 	@Override
 	public void receiveEvent(IRCEvent pEvent) {
+		if (Launcher.getManager().getDebugWindow() != null) {
+			Launcher.getManager().getDebugWindow().appendToChat(new ChatText()
+				.addSystemMessage("Event [" + pEvent.getType() + "] " + pEvent.getRawEventData())
+			);
+		}
 		switch(pEvent.getType()) {
 			case AWAY_EVENT: // TODO
-				System.out.println("AWAY_EVENT");
+				{
+					AwayEvent event = (AwayEvent) pEvent;
+					if (!event.isYou()) {
+						QueryWindow window = Launcher.getManager().findQueryWindow(event.getSession(), event.getNick());
+						if (window != null && !window.isClosed()) {
+							window.appendToChat(new ChatText().addNickname(event.getNick()).addSystemMessage(" is away: " + event.getAwayMessage()));
+						}
+					}
+					
+					else { // What to do?
+						
+					}
+				}
 				break;
 			case CHANNEL_LIST_EVENT: // TODO
 				break;
@@ -45,29 +62,161 @@ public class IRCEventHandler implements IRCEventListener{
 					window.appendToChat(output);
 				}
 				break;
-			case CONNECTION_LOST: // TODO
-				this.mWindow.appendToChat(new ChatText().addError("Connection lost!"));
+			case CONNECTION_LOST:
+				{
+					ConnectionLostEvent event = (ConnectionLostEvent) pEvent;
+					this.mWindow.appendToChat(new ChatText().addError("Connection lost! (" + event.getException().getMessage() + ")"));
+					this.mWindow.setTitle(pEvent.getSession().getRequestedConnection().getHostName() + " (Disconnected)");
+				}
+				break;
+			case CONNECTION_RETRY:
+				{
+					ConnectionRetryEvent event = (ConnectionRetryEvent) pEvent; 
+					this.mWindow.appendToChat(new ChatText().addError(event.getMessage()));
+					this.mWindow.setTitle(pEvent.getSession().getRequestedConnection().getHostName() + " (Connecting...)");
+				}
 				break;
 			case CONNECT_COMPLETE:
 				this.mWindow.setTitle(pEvent.getSession().getConnectedHostName());
 				break;
 			case CTCP_EVENT: // TODO
-				this.mWindow.appendToChat(new ChatText().addNotice("CTCP_EVENT"));
+				{
+					CtcpEvent event = (CtcpEvent) pEvent;
+					if (event.getCtcpString().startsWith("ACTION ")) { // Action goes here
+						if (event.getChannel() != null) {
+							ChannelWindow window = Launcher.getManager().findChannelWindow(event.getChannel());
+							if (window != null && !window.isClosed()) {
+								window.appendToChat(new ChatText()
+									.addAction(" - ")
+									.addNickname(event.getNick())
+									.addAction(event.getCtcpString().substring(7))
+								);
+							}
+						}
+						
+						else {
+							QueryWindow window = Launcher.getManager().findQueryWindow(this.mWindow.getSession(), event.getNick());
+							if (window != null && !window.isClosed()) {
+								window.appendToChat(new ChatText()
+									.addAction(" - ")
+									.addNickname(event.getNick())
+									.addAction(event.getCtcpString().substring(7))
+								);
+							}							
+						}
+					}
+					
+					else { // Unhandled for now TODO
+					}
+				}
 				break;
-			case DEFAULT: // Unused
+			case DEFAULT: // TODO - All unhandled messages go here
+				{
+					int command = 0;
+					try {
+						command = Integer.parseInt(pEvent.command());
+					} catch(Exception e) {}
+					
+					if ((command >= 250 && command <= 255) || command == 265 || command == 266) { // LUSER
+						ChatText buffer = new ChatText().addNotice(pEvent.arg(1));
+						if (pEvent.arg(2) != null) { buffer.addNotice(" " + pEvent.arg(2)); }
+						this.mWindow.appendToChat(buffer);
+					}
+					
+					else if (command == 303) { // Is on (/ison)
+						this.mWindow.appendToChat(new ChatText().addSystemMessage("Is on: " + pEvent.arg(1)));
+					}
+					
+					else if (command == 311) { // whois
+						this.mWindow.appendToChat(new ChatText()
+							.addNickname(pEvent.arg(1))
+							.addSystemMessage(" is " + pEvent.arg(2) + "@" + pEvent.arg(3) + " " + pEvent.arg(4) + " " + pEvent.arg(5))
+						);
+					}
+					
+					else if (command == 312) { // whois part two (server stuff)
+						this.mWindow.appendToChat(new ChatText()
+							.addNickname(pEvent.arg(1))
+							.addSystemMessage(" is using" + pEvent.arg(2) + " " + pEvent.arg(3))
+						);
+					}
+					
+					else if (command == 317) { // whois part three (idle time)
+						this.mWindow.appendToChat(new ChatText().addSystemMessage(pEvent.arg(1)));
+					}
+					
+					else if (command == 319) { // whois part four (Channels)
+						this.mWindow.appendToChat(new ChatText()
+							.addNickname(pEvent.arg(1))
+							.addSystemMessage(" is on " + pEvent.arg(2))
+						);
+					}
+					
+					else if (command == 369) { // who was end
+						this.mWindow.appendToChat(new ChatText().addSystemMessage(pEvent.arg(2)));
+					}
+					
+					else if (command == 371 || command == 374) { // ircd info (/info)
+						this.mWindow.appendToChat(new ChatText().addSystemMessage(pEvent.arg(1)));
+					}
+					
+					else if (command == 391) { // Time (/time)
+						this.mWindow.appendToChat(new ChatText().addSystemMessage(pEvent.arg(4)));
+					}
+					
+					else if (pEvent.command().equals("ERROR")) {
+						this.mWindow.appendToChat(new ChatText().addSystemMessage(pEvent.arg(1)));
+					}
+					
+					// If all else fails.. Dump the message in, so the user doesn't lose it, at least.
+					else if (!pEvent.command().equals("PING") && !pEvent.command().equals("PONG")) {
+						//this.mWindow.appendToChat(new ChatText().addSystemMessage(pEvent.arg(1)));
+					}
+				}
 				break;
-			case ERROR: // TODO
+			case ERROR:
 				{
 					switch(((ErrorEvent) pEvent).getErrorType()) {
 						case NUMERIC_ERROR:
 							{
 								NumericErrorEvent error = (NumericErrorEvent) pEvent;
-								if (error.command().equals("475")) { // Manual work-around for +k passworded channel error message, since jerklib borked it up
-									this.mWindow.appendToChat(new ChatText().addError(error.arg(1) + ": " + error.arg(2)));
+								switch(error.command()) { // Unparsed by jerklib. Handle manually where needed
+									case "401": // User not found
+										{
+											QueryWindow window = Launcher.getManager().findQueryWindow(error.getSession(), error.arg(1));
+											if (window != null && !window.isClosed()) {
+												window.appendToChat(new ChatText().addError("Error: " + error.arg(1) + ": " + error.arg(2)));
+											}
+										}
+										break;
+									case "404": // Cannot send to channel
+										break;
+									case "464": // Wrong password for channel
+										break;
+									case "465": // You are banned
+										break;
+									case "471": // Channel is full
+										break;
+									case "472": // Mode unknown
+										break;
+									case "475": // Channel requires password (+k)
+										break;
+									case "482": // Command requires +o (oper status)
+										break;
+									case "483": // Attempted to kill a server. Denied.
+										break;
 								}
+								// Send error message to server console
+								this.mWindow.appendToChat(new ChatText().addError("Error: " + error.arg(1) + ": " + error.arg(2)));
 								
-								else {
-									this.mWindow.appendToChat(new ChatText().addError(error.getErrorMsg()));
+								// If detected as an error for a channel, try to find channel window and send the error there too
+								if (error.getSession().isChannelToken(error.arg(1))) {
+									ChannelWindow window = Launcher.getManager().findChannelWindow(
+											error.getSession().getChannel(error.arg(1))
+										);
+									if (window != null && !window.isClosed()) {
+										window.appendToChat(new ChatText().addError("Error: " + error.arg(2)));
+									}
 								}
 							}
 							break;
@@ -75,9 +224,10 @@ public class IRCEventHandler implements IRCEventListener{
 							{
 								UnresolvedHostnameErrorEvent error = (UnresolvedHostnameErrorEvent) pEvent;
 								this.mWindow.appendToChat(new ChatText()
-									.addError(error.getException()
-									.getMessage() + "[" + error.getHostName() + "]")
+									.addError("Unable to connect to " + "[" + error.getHostName() + "]. Perhaps the server isn't there anymore? ")
+									.addError("(" + (error.getException().getMessage() != null ? error.getException().getMessage() : "No further information") + ")")
 								);
+								this.mWindow.setTitle(pEvent.getSession().getRequestedConnection().getHostName() + " (Disconnected)");
 							}
 							break;
 						case GENERIC:
@@ -141,7 +291,7 @@ public class IRCEventHandler implements IRCEventListener{
 					if (window != null && !window.isClosed()) {						
 						// Trigger output
 						window.appendToChat(new ChatText()
-							.addNickname(event.getNick())
+							.addNickname(event.getWho())
 							.addSystemMessage(" was kicked from the channel (" + event.getMessage() + ")")
 						);
 						window.updateUserList();
@@ -303,16 +453,22 @@ public class IRCEventHandler implements IRCEventListener{
 				}
 				break;
 			case UPDATE_HOST_NAME:
-				System.out.println("UPDATE_HOST_NAME");
+				//System.out.println("UPDATE_HOST_NAME");
 				break;
 			case WHOIS_EVENT:
-				System.out.println("WHOIS_EVENT");
+				//System.out.println("WHOIS_EVENT");
 				break;
 			case WHOWAS_EVENT:
-				System.out.println("WHOWAS_EVENT");
+				{
+					WhowasEvent event = (WhowasEvent) pEvent;
+					this.mWindow.appendToChat(new ChatText()
+						.addNickname(event.getNick())
+						.addSystemMessage(" was " + event.getUserName())
+					);
+				}
 				break;
 			case WHO_EVENT:
-				System.out.println("WHO_EVENT");
+				//System.out.println("WHO_EVENT");
 				break;
 			default:
 				break;

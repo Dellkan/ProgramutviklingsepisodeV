@@ -1,7 +1,9 @@
 package com.theforce.programutviklingsepisodeV;
 
 import java.awt.Color;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.swing.text.BadLocationException;
@@ -61,11 +63,16 @@ class ChatText {
 	
 	public void output(StyledDocument pDoc) {		
 		try {
-			pDoc.insertString(pDoc.getLength(), "\n", new SimpleAttributeSet());
+			if (Launcher.getPreferences().getBoolean("timestamp", false)) {
+				pDoc.insertString(pDoc.getLength(), "\n[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] ", new SimpleAttributeSet());
+			}
+			
+			else {
+				pDoc.insertString(pDoc.getLength(), "\n", new SimpleAttributeSet());
+			}
 			for (ExtendedText text : this.mLine) {
 				// Create attribute set
 				Style style = pDoc.getStyle("IRCChatStyle");
-		        StyleConstants.setAlignment(style, StyleConstants.ALIGN_LEFT);
 		        
 		        // Mark the text with the appropriate attribute
 				style.addAttribute("type", text.getType());
@@ -81,6 +88,7 @@ class ChatText {
 				switch(text.getType()) {
 					case ACTION: // Purple
 						StyleConstants.setForeground(style, new Color(100, 60, 255));
+						break;
 					case INVITE_ACCEPT:
 						StyleConstants.setForeground(style, Color.BLUE);
 						StyleConstants.setUnderline(style, true);
@@ -93,17 +101,17 @@ class ChatText {
 						StyleConstants.setForeground(style, new Color(0, 220, 0));
 						break;
 					case MOTD: // Dark green
-						StyleConstants.setForeground(style, new Color(0, 150, 0));
+						StyleConstants.setForeground(style, new Color(0, 100, 0));
 						break;
 					case NICKNAME:
 						StyleConstants.setForeground(style, Color.GRAY);
 						StyleConstants.setBold(style, true);
 						break;
-					case NOTICE: // Orange
-						StyleConstants.setForeground(style, new Color(255, 100, 60));
+					case NOTICE: // Dark red
+						StyleConstants.setForeground(style, new Color(150, 25, 10));
 						break;
 					case SYSTEM:
-						StyleConstants.setForeground(style, Color.LIGHT_GRAY);
+						StyleConstants.setForeground(style, Color.DARK_GRAY);
 						break;
 					case URL:
 						StyleConstants.setForeground(style, Color.BLUE);
