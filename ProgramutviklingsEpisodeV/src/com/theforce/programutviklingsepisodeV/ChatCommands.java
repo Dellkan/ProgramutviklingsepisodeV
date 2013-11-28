@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 import jerklib.Channel;
-
 /**
  * Maintains an interface towards chat commands, making it possible to retrieve and add commands.
+ * 
  * @author John
  * @author Jehans
  * @author Martin

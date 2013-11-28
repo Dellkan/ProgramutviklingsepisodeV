@@ -23,7 +23,7 @@ import java.util.List;
 import jerklib.Session;
 
 /**
- * 
+ * Main parent class for all the windows.
  * @author Hans Martin Bragen
  * @author Jehans Jr. Storvik
  * @author John Høegh-Omdal

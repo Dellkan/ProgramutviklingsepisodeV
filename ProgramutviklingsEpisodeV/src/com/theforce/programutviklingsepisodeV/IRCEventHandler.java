@@ -1,16 +1,12 @@
 package com.theforce.programutviklingsepisodeV;
 import jerklib.events.*;
 import jerklib.listeners.IRCEventListener;
-
 /**
- * 
+ * A class to handle all the various events that happens in the IRC client.
  * @author Hans Martin Bragen
  * @author John Høeg-Omdal
  * @author Jehans JR Storvik
- *
- * A class to handle all the various events that happens in the IRC client.
  */
-
 public class IRCEventHandler implements IRCEventListener{
 	private ServerWindow mWindow;
 	

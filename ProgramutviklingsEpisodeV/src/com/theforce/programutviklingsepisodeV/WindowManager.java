@@ -25,13 +25,10 @@ import jerklib.Channel;
 import jerklib.Session;
 
 /**
- * 
+ * This class is used to manage and contain all server, channel and PM windows 
  * @author Hans Martin Bragen
  * @author Jehans Jr. Storvik
  * @author John Høegh-Omdal
- *
- * This class is used to manage and contain all server, channel and PM windows 
- *
  */
 @SuppressWarnings("serial")
 public class WindowManager extends JFrame {

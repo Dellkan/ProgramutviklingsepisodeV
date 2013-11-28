@@ -6,11 +6,10 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 /**
+ * Containts public staic void main and starts the entire program.
  * @author Martin
  * @author Jehans
  * @author John
- * 
- * Containts public staic void main and starts the entire program.
  */
 public class Launcher {
 	public static WindowManager mWindowManager;

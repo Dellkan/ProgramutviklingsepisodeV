@@ -22,15 +22,12 @@ import javax.swing.JTextField;
 import jerklib.ConnectionManager;
 import jerklib.Profile;
 import jerklib.Session;
-
 /**
- * 
+ * Will show the connectionWindow frame once
+ * the "Connect to server" from the main window is pressed.
  * @author Jehans
  * @author John
  * @author Martin
- *
- * Will show the connectionWindow frame once
- * the "Connect to server" from the main window is pressed.
  */
 @SuppressWarnings("serial")
 public class LoadServers extends JFrame {
@@ -52,7 +49,7 @@ public class LoadServers extends JFrame {
 		try 
 		{
 			String sCurrentLine;		
-			br = new BufferedReader(new FileReader("mIRCServers.ini"));
+			br = new BufferedReader(new FileReader("/mIRCServers.ini"));
 			while(!(br.readLine().contains("[servers]")));
 			while ((sCurrentLine = br.readLine()) != null) 
 			{

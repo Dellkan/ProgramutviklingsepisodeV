@@ -1,7 +1,6 @@
 package com.theforce.programutviklingsepisodeV;
 
 import jerklib.Session;
-
 /**
  * a class specific for querying other users on the IRC server.
  * Makes it own window with a connection to the queried user.

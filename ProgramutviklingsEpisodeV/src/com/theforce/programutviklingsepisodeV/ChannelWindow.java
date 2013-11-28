@@ -3,12 +3,13 @@ package com.theforce.programutviklingsepisodeV;
 import jerklib.Channel;
 
 /**
+ * This class creates the window specific for a connected channel
+ * <br> and handles the functions that are channel only.  Extends the window class.
  * @author Martin
  * @author Jehans
  * @author John
  *
- * This class creates the window specific for a connected channel
- * <br> and handles the functions that are channel only.  Extends the window class.
+
  */
 @SuppressWarnings("serial")
 public class ChannelWindow extends Window {

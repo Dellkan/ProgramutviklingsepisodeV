@@ -9,8 +9,6 @@ import javax.swing.ComboBoxModel;
 import javax.swing.JComboBox;
 
 import jerklib.Channel;
-
-
 /**
  * This class parses the command line, and finds suitable suggestions it can give
  * to the Command line

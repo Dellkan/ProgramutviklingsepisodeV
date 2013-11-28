@@ -7,12 +7,13 @@ import javax.swing.JButton;
 import javax.swing.JToolBar;
 
 /**
+ * Makes the toolbar which is seen on the top in the main window.
+ * <br>Contains the connect button which shows the connect to  server window.
  * @author Martin
  * @author Jehans
  * @author John
  * 
- * Makes the toolbar which is seen on the top in the main window.
- * <br>Contains the connect button which shows the connect to  server window.
+
  */
 @SuppressWarnings("serial")
 public class ActionToolbar extends JToolBar {

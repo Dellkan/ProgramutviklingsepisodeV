@@ -5,12 +5,11 @@ import java.io.Serializable;
 import java.util.Vector;
 
 /**
+ * Receives a string which contains a single server.
+ * A server helperclass.
  * @author Jehans Storvik
  * @author John Høegh Omdal
  * @author Martin Bragen
- * 
- * Receives a string which contains a single server.
- * A server helperclass.
  */
 public class Server  {
 	private static final long serialVersionUID = 1L;

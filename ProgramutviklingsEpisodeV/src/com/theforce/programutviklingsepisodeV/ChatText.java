@@ -11,7 +11,6 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
-
 /**
  * Handles chat text in windows
  * @author Hans Martin Bragen

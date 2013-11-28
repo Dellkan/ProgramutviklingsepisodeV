@@ -10,11 +10,10 @@ import jerklib.Channel;
 import jerklib.ModeAdjustment;
 
 /**
+ * Makes a list of of all the users on the right side of the chat window.
  * @author John
  * @author jehans
  * @author Martin
- * 
- * Makes a list of of all the users on the right side of the chat window.
  */
 
 @SuppressWarnings({ "serial", "rawtypes" })
