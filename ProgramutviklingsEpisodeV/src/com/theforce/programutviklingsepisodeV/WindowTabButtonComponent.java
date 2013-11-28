@@ -7,6 +7,13 @@ import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+/**
+ * This class is responsible for auto completion
+ * @author Hans Martin Bragen
+ * @author Jehans Jr. Storvik
+ * @author John Høegh-Omdal
+ *
+ */
 
 @SuppressWarnings("serial")
 class WindowTabButtonComponent extends JPanel {
