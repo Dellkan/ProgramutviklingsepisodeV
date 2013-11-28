@@ -8,7 +8,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 /**
- * This class is responsible for auto completion
+ * This class is responsible for making the small windowtabs on top of the main window
+ * <br> which contains "shortcuts" to the active windows.
  * @author Hans Martin Bragen
  * @author Jehans Jr. Storvik
  * @author John Høegh-Omdal
