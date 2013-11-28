@@ -12,55 +12,105 @@ import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
+/**
+ * Handles chat text in windows
+ * @author Hans Martin Bragen
+ * @author Jehans Jr. Storvik
+ * @author John Høegh-Omdal
+ *
+ */
+
 class ChatText {
 	public enum Type {NICKNAME, URL, INVITE_ACCEPT, NOTICE, SYSTEM, MOTD, ERROR, NORMAL, HELP, ACTION}
 	private List<ExtendedText> mLine = new ArrayList<ExtendedText>();
 	
+	/**
+	 * appends nickname to the chat
+	 * @param pNick the nick of the 
+	 * @return updated self
+	 */
 	public ChatText addNickname(String pNick) {
 		this.mLine.add(new ExtendedText(Type.NICKNAME, " <" + pNick + "> ", pNick));
 		return this;
 	}
-	
+	/**
+	 * Adds text to the chat
+	 * @param pText string with text to append to the chat
+	 * @return updated self
+	 */
 	public ChatText addText(String pText) {
 		this.mLine.add(new ExtendedText(Type.NORMAL, pText));
 		return this;
 	}
-	
+	/**
+	 * adds that the user  have accepted an invite to the chat
+	 * @return updated self
+	 */
 	public ChatText addInviteAccept() {
 		this.mLine.add(new ExtendedText(Type.INVITE_ACCEPT, "Accept"));
 		return this;
 	}
 	
+	/**
+	 * appends a notice to the chat
+	 * @param pText string with the text in the notice
+	 * @return updated self
+	 */
 	public ChatText addNotice(String pText) {
 		this.mLine.add(new ExtendedText(Type.NOTICE, pText));
 		return this;
 	}
-	
+	/**
+	 * Apends a system message to the chat
+	 * @param pText string containing the system message
+	 * @return updated self
+	 */
 	public ChatText addSystemMessage(String pText) {
 		this.mLine.add(new ExtendedText(Type.SYSTEM, pText));
 		return this;
 	}
 	
+	/**
+	 * appends a MOTD to the chat
+	 * @param pText String containing the MOTD
+	 * @return updated self
+	 */
 	public ChatText addMOTDLine(String pText) {
 		this.mLine.add(new ExtendedText(Type.MOTD, pText));
 		return this;
 	}
-	
+	/**
+	 * Appends an error to the chat
+	 * @param pText string containing the error
+	 * @return updated self
+	 */
 	public ChatText addError(String pText) {
 		this.mLine.add(new ExtendedText(Type.ERROR, pText));
 		return this;
 	}
-	
+	/**
+	 * appends help message to the command line
+	 * @param pText string containing the help message
+	 * @return updated self
+	 */
 	public ChatText addHelp(String pText) {
 		this.mLine.add(new ExtendedText(Type.HELP, pText));
 		return this;
 	}
 	
+	/**
+	 * Appends an action event to the chat
+	 * @param pText string containing the action event
+	 * @return updated self
+	 */
 	public ChatText addAction(String pText) {
 		this.mLine.add(new ExtendedText(Type.ACTION, pText));
 		return this;
 	}
-	
+	/**
+	 * Controls the styling and coloring of the text in the chat.
+	 * @param pDoc Styledocument to be used.
+	 */
 	public void output(StyledDocument pDoc) {		
 		try {
 			if (Launcher.getPreferences().getBoolean("timestamp", false)) {
@@ -127,12 +177,21 @@ class ChatText {
 			}
 		} catch (BadLocationException e) {}
 	}
-	
+	/**
+	 * Checks if the chat is empty
+	 * @return true if the chat is empty
+	 */
 	public boolean isEmpty() {
 		return this.mLine.size() == 0;
 	}
 }
-
+/**
+ * 
+ * @author Hans Martin Bragen
+ * @author Jehans Jr. Storvik
+ * @author John Høegh-Omdal
+ *
+ */
 class ExtendedText {
 	private ChatText.Type mType;
 	private String mText;
